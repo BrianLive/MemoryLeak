@@ -6,13 +6,22 @@ namespace MemoryLeak
 {
     public class Game : Microsoft.Xna.Framework.Game
     {
-        GraphicsDeviceManager _graphics;
+        public class Core
+        {
+            public static GraphicsDeviceManager GraphicsDeviceManager { get; internal set; }
+            public static GraphicsDevice GraphicsDevice { get { return GraphicsDeviceManager.GraphicsDevice; } }
+        }
+
+        readonly GraphicsDeviceManager _graphics;
         SpriteBatch _spriteBatch;
 
         public Game()
         {
             _graphics = new GraphicsDeviceManager(this);
-            Content.RootDirectory = "Content";
+            Core.GraphicsDeviceManager = _graphics;
+
+            ResourceDirectory.Textures = "Content/Textures/";
+            ResourceDirectory.SoundEffects = "Content/Sound/Effects";
         }
 
         protected override void LoadContent()

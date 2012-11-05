@@ -7,7 +7,7 @@
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Memory_Leak</RootNamespace>
+    <RootNamespace>MemoryLeak</RootNamespace>
     <AssemblyName>Memory Leak</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
@@ -16,8 +16,10 @@
     <XnaProfile>Reach</XnaProfile>
     <XnaCrossPlatformGroupID>adf89fc4-da6a-4067-9f20-76aec5feb149</XnaCrossPlatformGroupID>
     <XnaOutputType>Game</XnaOutputType>
-    <ApplicationIcon>Game.ico</ApplicationIcon>
-    <Thumbnail>GameThumbnail.png</Thumbnail>
+    <ApplicationIcon>
+    </ApplicationIcon>
+    <Thumbnail>
+    </Thumbnail>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -75,12 +77,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Game.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Game.ico" />
-    <Content Include="GameThumbnail.png">
-      <XnaPlatformSpecific>true</XnaPlatformSpecific>
-    </Content>
+    <Compile Include="Resource.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Memory LeakContent\Memory LeakContent.contentproj">
