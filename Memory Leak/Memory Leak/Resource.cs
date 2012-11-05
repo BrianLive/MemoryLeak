@@ -6,41 +6,44 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace MemoryLeak
 {
-    public class ResourceDirectory
-    {
-        public static String Textures { get; set; }
-        public static String SoundEffects { get; set; }
-    }
+	static class ResourceDirectory
+	{
+		public static string Base = "Content/";
+		public static string Textures = "Textures/";
+		public static string SoundEffects = "Audio/Sounds/";
+	}
 
-    class Resource<T> where T : class
-    {
-        private static readonly Dictionary<string, T> Resources = new Dictionary<string, T>();
+	static class Resource<T> where T : class
+	{
+		private static readonly Dictionary<string, T> Resources = new Dictionary<string, T>();
 
-        public static T Get(string name)
-        {
-            switch (typeof(T).Name)
-            {
-                case "Texture2D":
-                    if(ResourceDirectory.Textures == null) throw new Exception("Texture Directory needs to be set.");
+		public static T Get(string name)
+		{
+			switch (typeof(T).Name)
+			{
+				case "Texture2D":
+					if (string.IsNullOrEmpty(ResourceDirectory.Textures)) throw new Exception("Texture Directory needs to be set");
 
-                    if (!Resources.ContainsKey(name))
-                    {
-                        var stream = new FileStream("Content/Textures/" + name + ".png", FileMode.Open);
-                        Resources.Add(name, Texture2D.FromStream(Game.Core.GraphicsDevice, stream) as T);
-                    }
-                    break;
-                case "SoundEffect":
-                    if (ResourceDirectory.SoundEffects == null) throw new Exception("Sound Effects Directory needs to be set.");
+					if (!Resources.ContainsKey(name))
+					{
+						var stream = new FileStream(ResourceDirectory.Base + ResourceDirectory.Textures + name + ".png", FileMode.Open);
+						Resources.Add(name, Texture2D.FromStream(Game.Core.GraphicsDevice, stream) as T);
+					}
+					break;
+				case "SoundEffect":
+					if (string.IsNullOrEmpty(ResourceDirectory.SoundEffects)) throw new Exception("Sound Effects Directory needs to be set");
 
-                    if (!Resources.ContainsKey(name))
-                    {
-                        var stream = new FileStream("Content/Audio/Sounds/" + name + ".wav", FileMode.Open);
-                        Resources.Add(name, SoundEffect.FromStream(stream) as T);
-                    }
-                    break;
-            }
+					if (!Resources.ContainsKey(name))
+					{
+						var stream = new FileStream(ResourceDirectory.Base + ResourceDirectory.SoundEffects + name + ".wav", FileMode.Open);
+						Resources.Add(name, SoundEffect.FromStream(stream) as T);
+					}
+					break;
+				default:
+					throw new Exception("Missing resource type");
+			}
 
-            return Resources[name];
-        }
-    }
+			return Resources[name];
+		}
+	}
 }
