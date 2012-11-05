@@ -2,7 +2,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
-namespace Memory_Leak
+namespace MemoryLeak
 {
     public class Game : Microsoft.Xna.Framework.Game
     {

@@ -1,6 +1,6 @@
 using System;
 
-namespace Memory_Leak
+namespace MemoryLeak
 {
 #if WINDOWS || XBOX
     static class Program
