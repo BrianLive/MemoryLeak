@@ -1,0 +1,24 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Memory Leak", "Memory Leak\Memory Leak\Memory Leak.csproj", "{D620E467-9CFE-4AD1-87FD-19A4647874F3}"
+EndProject
+Project("{96E2B04D-8817-42C6-938A-82C39BA4D311}") = "Memory LeakContent", "Memory Leak\Memory LeakContent\Memory LeakContent.contentproj", "{5FDC76BE-D07F-4D0B-A0D0-2B8C23743EC5}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D620E467-9CFE-4AD1-87FD-19A4647874F3}.Debug|x86.ActiveCfg = Debug|x86
+		{D620E467-9CFE-4AD1-87FD-19A4647874F3}.Debug|x86.Build.0 = Debug|x86
+		{D620E467-9CFE-4AD1-87FD-19A4647874F3}.Release|x86.ActiveCfg = Release|x86
+		{D620E467-9CFE-4AD1-87FD-19A4647874F3}.Release|x86.Build.0 = Release|x86
+		{5FDC76BE-D07F-4D0B-A0D0-2B8C23743EC5}.Debug|x86.ActiveCfg = Debug|x86
+		{5FDC76BE-D07F-4D0B-A0D0-2B8C23743EC5}.Release|x86.ActiveCfg = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
