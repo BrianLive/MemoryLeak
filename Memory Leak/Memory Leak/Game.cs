@@ -72,7 +72,40 @@ namespace MemoryLeak
 
             for (var x = 0; x < chunk.Width; x++)
                 for (var y = 0; y < chunk.Height; y++ )
-                    chunk.Set(x, y, new Chunk.Tile(Resource<Texture2D>.Get("debug")));
+                    chunk.Set(x, y, new Chunk.Tile(Resource<Texture2D>.Get("debug")) {IsPassable = true});
+
+            var player = new Entity(Resource<Texture2D>.Get("debug-entity"), 4, 4);
+
+            player.Tick += sender =>
+                               {
+                                   var k = Keyboard.GetState();
+                                   foreach (var i in k.GetPressedKeys())
+                                   {
+                                       var move = Vector2.Zero;
+
+                                       switch(i)
+                                       {
+                                           case Keys.W:
+                                               move.Y -= 1;
+                                               break;
+                                           case Keys.S:
+                                               move.Y += 1;
+                                               break;
+                                           case Keys.A:
+                                               move.X -= 1;
+                                               break;
+                                           case Keys.D:
+                                               move.X += 1;
+                                               break;
+                                       }
+
+                                       player.Move((int)move.X, (int)move.Y, 1);
+
+                                       if (move != Vector2.Zero) camera.Position = player.Position;
+                                   }
+                               };
+
+            chunk.Add(player);
 
             return new State(chunk, camera);
         }
