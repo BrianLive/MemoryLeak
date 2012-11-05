@@ -10,6 +10,16 @@ namespace MemoryLeak
         {
             public static GraphicsDeviceManager GraphicsDeviceManager { get; internal set; }
             public static GraphicsDevice GraphicsDevice { get { return GraphicsDeviceManager.GraphicsDevice; } }
+
+            public static Vector2 Resolution
+            {
+                get { return new Vector2(GraphicsDeviceManager.PreferredBackBufferWidth, GraphicsDeviceManager.PreferredBackBufferHeight); }
+                set
+                {
+                    GraphicsDeviceManager.PreferredBackBufferWidth = (int)value.X;
+                    GraphicsDeviceManager.PreferredBackBufferHeight = (int)value.Y;
+                }
+            }
         }
 
         readonly GraphicsDeviceManager _graphics;
@@ -44,10 +54,6 @@ namespace MemoryLeak
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.Black);
-
-            _spriteBatch.Begin();
-
-            _spriteBatch.End();
 
             base.Draw(gameTime);
         }
