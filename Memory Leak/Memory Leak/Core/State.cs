@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace MemoryLeak.Core
 {
-    class State
+    public class State
     {
         public Chunk Chunk { get; set; }
         public Camera Camera { get; set; }

@@ -1,3 +1,4 @@
+using MemoryLeak.Core;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -25,18 +26,20 @@ namespace MemoryLeak
         readonly GraphicsDeviceManager _graphics;
         SpriteBatch _spriteBatch;
 
+        public State CurrentState { get; set; }
+
         public Game()
         {
+            // DON'T DO INITIALIZATION STUFF HERE, DO IT IN LOAD CONTENT gosh - Brian
             _graphics = new GraphicsDeviceManager(this);
             Core.GraphicsDeviceManager = _graphics;
-
-            ResourceDirectory.Textures = "Content/Textures/";
-            ResourceDirectory.SoundEffects = "Content/Sound/Effects";
         }
 
         protected override void LoadContent()
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
+
+            CurrentState = LoadDebugMap();
         }
 
         protected override void UnloadContent()
@@ -48,6 +51,8 @@ namespace MemoryLeak
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
                 Exit();
 
+            CurrentState.Update(gameTime);
+
             base.Update(gameTime);
         }
 
@@ -55,7 +60,21 @@ namespace MemoryLeak
         {
             GraphicsDevice.Clear(Color.Black);
 
+            CurrentState.Draw(_spriteBatch);
+
             base.Draw(gameTime);
+        }
+
+        private static State LoadDebugMap()
+        {
+            var chunk = new Chunk(32, 32);
+            var camera = new Camera();
+
+            for (var x = 0; x < chunk.Width; x++)
+                for (var y = 0; y < chunk.Height; y++ )
+                    chunk.Set(x, y, new Chunk.Tile(Resource<Texture2D>.Get("debug")));
+
+            return new State(chunk, camera);
         }
     }
 }

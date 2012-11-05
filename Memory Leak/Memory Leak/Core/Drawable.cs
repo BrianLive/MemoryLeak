@@ -3,7 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace MemoryLeak.Core
 {
-    class Drawable
+    public class Drawable
     {
         public const int Width = 32;
         public const int Height = 32;

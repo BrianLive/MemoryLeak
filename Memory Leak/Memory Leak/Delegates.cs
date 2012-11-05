@@ -2,7 +2,7 @@
 
 namespace MemoryLeak
 {
-    class Delegates
+    public class Delegates
     {
         public delegate void EntityHandler(Drawable sender);
     }

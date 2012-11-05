@@ -5,7 +5,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace MemoryLeak.Core
 {
-    class Chunk
+    public class Chunk
     {
         public class Tile : Drawable
         {

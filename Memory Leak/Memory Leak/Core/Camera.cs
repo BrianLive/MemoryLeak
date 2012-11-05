@@ -2,7 +2,7 @@
 
 namespace MemoryLeak.Core
 {
-    class Camera
+    public class Camera
     {
         private Matrix _matrix;
         private Vector2 _position = Vector2.Zero;

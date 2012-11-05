@@ -5,7 +5,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace MemoryLeak.Core
 {
-    class Entity : Drawable
+    public class Entity : Drawable
     {
         private Chunk.Tile _parentTile;
 
@@ -50,33 +50,34 @@ namespace MemoryLeak.Core
         public void Move(int x, int y, float rate)
         {
             rate = Math.Abs(rate);
-            Position += new Vector2(x * rate, 0); // Adjust Horizontal Movement
-            CorrectParent(); // Determine Parent Tile
-            Correct(0); // Horizontal Collision Pass
-            Position += new Vector2(0, y * rate); // Adjust Vertical Movement
+            Position += new Vector2(x * rate, 0); // Adjust Horizontal Movement - Brian
+            CorrectParent(); // Determine Parent Tile - Brian
+            Correct(0); // Horizontal Collision Pass - Brian
+            Position += new Vector2(0, y * rate); // Adjust Vertical Movement - Brian
             CorrectParent();
-            Correct(1); // Vertical Collision Pass
-            Correct(2); // Entity Collision Pass
+            Correct(1); // Vertical Collision Pass - Brian
+            Correct(2); // Entity Collision Pass - Brian
 
             if (ParentTile != null) ParentTile.OnStep(this);
         }
 
         public void Correct(int flag, int checkDistance = 2)
         {
-            // Check Distance is the amount of tiles out that we want to check
+            // Check Distance is the amount of tiles out that we want to check - Brian
             for (var xx = -checkDistance; xx <= checkDistance; xx++)
                 for (var yy = -checkDistance; yy <= checkDistance; yy++)
                 {
                     var tile = Parent.Get((int)Math.Round(CenterPosition.X / Width) + xx,
                                           (int)Math.Round(CenterPosition.Y / Height) + yy);
 
-                    if (flag == 2) // Entity Collision Pass
+                    if (flag == 2) // Entity Collision Pass - Brian
                     {
-                        if (tile == null) continue; // If this tile doesn't exist, move to the next tile.
+                        if (tile == null) continue; // If this tile doesn't exist, move to the next tile. - Brian
 
                         /* We cannot modify an active list
                          * So we duplicate it and make our changes to the duplicate
-                         * Later on in the code we apply these changes to the old list, while it is inactive. */
+                         * Later on in the code we apply these changes to the old list, while it is inactive. 
+                         * - Brian*/
                         var duplicate = new Entity[tile.Children.Count];
                         tile.Children.CopyTo(duplicate);
 
