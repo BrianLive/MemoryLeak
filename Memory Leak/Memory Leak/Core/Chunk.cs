@@ -79,11 +79,11 @@ namespace MemoryLeak.Core
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            var xSize = (int)(Parent.Camera.Position.X - (Game.Resolution.X / 2)) / Drawable.Width;
-            var ySize = (int)(Parent.Camera.Position.Y - (Game.Resolution.Y / 2)) / Drawable.Height;
+            var xSize = (int)(Parent.Camera.Position.X - (Game.Core.Resolution.X / 2)) / Drawable.Width;
+            var ySize = (int)(Parent.Camera.Position.Y - (Game.Core.Resolution.Y / 2)) / Drawable.Height;
 
-            for (var x = xSize; x < xSize + (Game.Resolution.X / 2); x++)
-                for (var y = ySize; y < ySize + (Game.Resolution.Y / 2); y++)
+            for (var x = xSize; x < xSize + (Game.Core.Resolution.X / 2); x++)
+                for (var y = ySize; y < ySize + (Game.Core.Resolution.Y / 2); y++)
                     if (x < Width && y < Height && x >= 0 && y >= 0)
                         if (_tiles[x, y] != null)
                             _tiles[x, y].Draw(spriteBatch);

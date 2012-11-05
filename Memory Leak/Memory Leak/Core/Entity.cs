@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -13,10 +11,6 @@ namespace MemoryLeak.Core
 
         public Chunk Parent { get; set; }
         public bool IsPassable { get; set; }
-
-        public int EnergyCapacity { get; set; }
-        public int EnergyPool { get; set; }
-        public int EnergyPush { get; set; }
 
         public Chunk.Tile ParentTile
         {
@@ -45,9 +39,6 @@ namespace MemoryLeak.Core
         {
             Position = new Vector2(x * Width, y * Height);
             IsPassable = isPassable;
-            EnergyCapacity = 100;
-            EnergyPool = EnergyCapacity;
-            EnergyPush = 0;
         }
 
         public void Kill(Entity killer)
@@ -59,29 +50,33 @@ namespace MemoryLeak.Core
         public void Move(int x, int y, float rate)
         {
             rate = Math.Abs(rate);
-            Position += new Vector2(x * rate, 0);
+            Position += new Vector2(x * rate, 0); // Adjust Horizontal Movement
+            CorrectParent(); // Determine Parent Tile
+            Correct(0); // Horizontal Collision Pass
+            Position += new Vector2(0, y * rate); // Adjust Vertical Movement
             CorrectParent();
-            Correct(0, 2);
-            Position += new Vector2(0, y * rate);
-            CorrectParent();
-            Correct(1, 2);
-            Correct(2, 2);
+            Correct(1); // Vertical Collision Pass
+            Correct(2); // Entity Collision Pass
 
             if (ParentTile != null) ParentTile.OnStep(this);
         }
 
-        public void Correct(int flag, int checkDistance = 1)
+        public void Correct(int flag, int checkDistance = 2)
         {
+            // Check Distance is the amount of tiles out that we want to check
             for (var xx = -checkDistance; xx <= checkDistance; xx++)
                 for (var yy = -checkDistance; yy <= checkDistance; yy++)
                 {
                     var tile = Parent.Get((int)Math.Round(CenterPosition.X / Width) + xx,
                                           (int)Math.Round(CenterPosition.Y / Height) + yy);
 
-                    if (flag == 2)
+                    if (flag == 2) // Entity Collision Pass
                     {
-                        if (tile == null) continue;
+                        if (tile == null) continue; // If this tile doesn't exist, move to the next tile.
 
+                        /* We cannot modify an active list
+                         * So we duplicate it and make our changes to the duplicate
+                         * Later on in the code we apply these changes to the old list, while it is inactive. */
                         var duplicate = new Entity[tile.Children.Count];
                         tile.Children.CopyTo(duplicate);
 
@@ -144,8 +139,6 @@ namespace MemoryLeak.Core
         public void Update(GameTime gameTime)
         {
             if (Tick != null) Tick(this);
-            EnergyPool = EnergyCapacity;
-            EnergyPush = 0;
         }
 
         private void OnCollision(Drawable sender)
