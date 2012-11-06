@@ -11,6 +11,8 @@ namespace MemoryLeak.Core
         public class Tile : Drawable
         {
             public bool IsPassable { get; set; }
+            public bool IsRamp { get; set; }
+
             public Chunk Parent { get; set; }
 
             public List<Entity> Children = new List<Entity>();
@@ -30,24 +32,26 @@ namespace MemoryLeak.Core
             }
         }
 
-        private readonly Tile[,] _tiles;
+        private readonly Tile[,,] _tiles;
         private readonly List<Entity> _entities = new List<Entity>();
 
-        public int Width { get; set; }
-        public int Height { get; set; }
+        public int Width { get; private set; }
+        public int Height { get; private set; }
+        public int Depth { get; private set; }
 
         public State Parent { get; set; }
 
-        public Chunk(int width, int height)
+        public Chunk(int width, int height, int depth = 1)
         {
             Width = width;
             Height = height;
+            Depth = depth;
 
-            _tiles = new Tile[width, height];
+            _tiles = new Tile[width, height, depth];
 
             for (var x = 0; x < width; x++)
                 for (var y = 0; y < height; y++)
-                    _tiles[x, y] = new Tile(Resource<Texture2D>.Get("debug")) { Position = new Vector2(x * Drawable.Width, y * Drawable.Height), IsPassable = true };
+                    _tiles[x, y, 0] = new Tile(Resource<Texture2D>.Get("debug")) { IsPassable = true };
         }
 
         public void Add(Entity entity)
@@ -62,20 +66,21 @@ namespace MemoryLeak.Core
             _entities.Remove(entity);
         }
 
-        public void Set(int x, int y, Tile tile)
+        public void Set(int x, int y, int z, Tile tile)
         {
             x = Math.Max(0, x);
             y = Math.Max(0, y);
+            z = Math.Max(0, z);
 
-            _tiles[x, y] = tile;
+            _tiles[x, y, z] = tile;
             tile.Position = new Vector2(x * Drawable.Width, y * Drawable.Height);
             tile.Parent = this;
         }
 
-        public Tile Get(int x, int y)
+        public Tile Get(int x, int y, int z)
         {
             if (x > Width - 1 || y > Height - 1 || x < 0 || y < 0) return null;
-            return _tiles[x, y];
+            return _tiles[x, y, z];
         }
 
         public void Draw(SpriteBatch spriteBatch)
@@ -85,9 +90,10 @@ namespace MemoryLeak.Core
 
             for (var x = xSize; x < xSize + (Game.Core.Resolution.X / 2); x++)
                 for (var y = ySize; y < ySize + (Game.Core.Resolution.Y / 2); y++)
-                    if (x < Width && y < Height && x >= 0 && y >= 0)
-                        if (_tiles[x, y] != null)
-                            _tiles[x, y].Draw(spriteBatch);
+                    for (var z = 0; z < Depth; z++)
+                        if (x < Width && y < Height && x >= 0 && y >= 0)
+                            if (_tiles[x, y, z] != null)
+                                _tiles[x, y, z].Draw(spriteBatch);
 
             foreach (var i in _entities)
                 i.Draw(spriteBatch);

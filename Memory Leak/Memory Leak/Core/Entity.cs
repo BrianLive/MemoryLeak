@@ -12,6 +12,8 @@ namespace MemoryLeak.Core
 
         public Chunk Parent { get; set; }
         public bool IsPassable { get; set; }
+        public bool IsWalkable { get; set; }
+        public int Depth { get; set; }
 
         public Chunk.Tile ParentTile
         {
@@ -35,10 +37,12 @@ namespace MemoryLeak.Core
 
         public event Action<Drawable> Death, Tick, Collision;
 
-        public Entity(Texture2D texture, int x, int y, bool isPassable = false)
+        public Entity(Texture2D texture, int x, int y, int z, bool isPassable = false)
             : base(texture)
         {
             Position = new Vector2(x * Width, y * Height);
+            Depth = z;
+
             IsPassable = isPassable;
         }
 
@@ -69,7 +73,7 @@ namespace MemoryLeak.Core
                 for (var yy = -checkDistance; yy <= checkDistance; yy++)
                 {
                     var tile = Parent.Get((int)Math.Round(CenterPosition.X / Width) + xx,
-                                          (int)Math.Round(CenterPosition.Y / Height) + yy);
+                                          (int)Math.Round(CenterPosition.Y / Height) + yy, Depth);
 
                     if (flag == 2) // Entity Collision Pass - Brian
                     {
@@ -135,7 +139,7 @@ namespace MemoryLeak.Core
         public void CorrectParent()
         {
             if (Parent == null) return;
-            ParentTile = Parent.Get((int)CenterPosition.X / Width, (int)CenterPosition.Y / Height);
+            ParentTile = Parent.Get((int)CenterPosition.X / Width, (int)CenterPosition.Y / Height, Depth);
         }
 
         public void Update(GameTime gameTime)

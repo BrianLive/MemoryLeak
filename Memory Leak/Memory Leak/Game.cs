@@ -75,9 +75,9 @@ namespace MemoryLeak
 
             for (var x = 0; x < chunk.Width; x++)
                 for (var y = 0; y < chunk.Height; y++ )
-                    chunk.Set(x, y, new Chunk.Tile(Resource<Texture2D>.Get("debug")) {IsPassable = true});
+                    chunk.Set(x, y, 0, new Chunk.Tile(Resource<Texture2D>.Get("debug")) {IsPassable = true});
 
-            var player = new Entity(Resource<Texture2D>.Get("debug-entity"), 4, 4);
+            var player = new Entity(Resource<Texture2D>.Get("debug-entity"), 4, 4, 0);
 
             player.Tick += sender =>
                                {

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using MemoryLeak.Audio;
-using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace MemoryLeak
