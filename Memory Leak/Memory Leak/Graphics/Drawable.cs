@@ -1,7 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace MemoryLeak.Core
+namespace MemoryLeak.Graphics
 {
     public class Drawable
     {
