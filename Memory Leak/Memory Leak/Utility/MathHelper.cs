@@ -5,7 +5,7 @@ using System.Text;
 
 namespace MemoryLeak.Utility
 {
-    class MathHelper
+    class MathHelper //MY WHOLE LIFE IS A LIE
     {
         public static float Lerp(float value, float min, float max)
         {
