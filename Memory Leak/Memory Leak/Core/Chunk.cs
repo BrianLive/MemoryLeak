@@ -15,7 +15,7 @@ namespace MemoryLeak.Core
 
             public List<Entity> Children = new List<Entity>();
 
-            public event Delegates.EntityHandler Step;
+            public event Action<Drawable> Step;
 
             public Tile(Texture2D texture)
                 : base(texture)

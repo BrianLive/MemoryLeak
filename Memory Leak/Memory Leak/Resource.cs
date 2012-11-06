@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using MemoryLeak.Audio;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -30,15 +31,17 @@ namespace MemoryLeak
 						Resources.Add(name, Texture2D.FromStream(Game.Core.GraphicsDevice, stream) as T);
 					}
 					break;
-				case "SoundEffect":
+
+				case "Sound":
 					if (string.IsNullOrEmpty(ResourceDirectory.SoundEffects)) throw new Exception("Sound Effects Directory needs to be set");
 
 					if (!Resources.ContainsKey(name))
 					{
 						var stream = new FileStream(ResourceDirectory.Base + ResourceDirectory.SoundEffects + name + ".wav", FileMode.Open);
-						Resources.Add(name, SoundEffect.FromStream(stream) as T);
+						Resources.Add(name, Sound.FromStream(stream) as T);
 					}
 					break;
+
 				default:
 					throw new Exception("Missing resource type");
 			}
