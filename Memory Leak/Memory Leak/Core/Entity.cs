@@ -64,11 +64,11 @@ namespace MemoryLeak.Core
 
             Position += new Vector2(x*rate, y*rate);
             CorrectParent();
-            Position = CorrectNew(Position);
+            CorrectNew();
             if (ParentTile != null) ParentTile.OnStep(this);
         }
 
-        public Vector2 CorrectNew(Vector2 position)
+        public void CorrectNew()
         {
             for(var x = -2; x <= 2; x++)
                 for(var y = -2; y <= 2; y++)
@@ -76,46 +76,49 @@ namespace MemoryLeak.Core
                     var tile = Parent.Get((int)Math.Round(CenterPosition.X / Width) + x,
                                           (int)Math.Round(CenterPosition.Y / Height) + y, Depth);
 
-                    if (tile == null) Console.WriteLine(x + ", " + y + ": null");
-
                     if (tile == null)
                     {
-                        var tileLower = Depth == 0 ? null : Parent.Get((int)Math.Round((position.X + (Width / 2)) / Width) + x,
-                        (int)Math.Round((position.Y + (Height / 32)) / Height) + y, Depth - 1);
+                        var tileLower = Depth == 0 ? null : Parent.Get((int)Math.Round((Position.X + (Width / 2)) / Width) + x,
+                        (int)Math.Round((Position.Y + (Height / 32)) / Height) + y, Depth - 1);
 
-                        if (tileLower == null || !tileLower.Children.Any(i => i.IsWalkable))
+                        if (tileLower == null || (!tileLower.Children.Any(i => i.IsWalkable) && !tileLower.IsRamp))
                         {
-                            var rectangle = new Rectangle((int)Math.Round((position.X + (Width / 2)) / Width) + x,
-                                                          (int)Math.Round((position.Y + (Height / 32)) / Height) + y, Width,
+                            var rectangle = new Rectangle((int) (Math.Round(CenterPosition.X/Width) + x) * Width,
+                                                          (int) (Math.Round(CenterPosition.Y/Height) + y) * Height, Width,
                                                           Height);
-                            if (Rectangle.Intersects(rectangle)) Offset(ref position, rectangle);
+
+                            if (Rectangle.Intersects(rectangle))
+                            {
+                                Offset(rectangle);
+                            }
+                        }
+                        else if(tileLower.IsRamp)
+                        {
+                            
                         }
                     }
                     else if (!tile.IsPassable && Rectangle.Intersects(tile.Rectangle))
-                        Offset(ref position, tile.Rectangle);
+                    {
+                        Offset(tile.Rectangle);
+                    }
                 }
-
-            return position;
         }
 
-        private void Offset(ref Vector2 position, Rectangle other)
+        private void Offset(Rectangle other)
         {
             var over = Rectangle.Intersect(Rectangle, other);
-            var temp = new Vector2(position.X, position.Y);
 
-            if(temp.X < other.X) temp -= new Vector2(over.Width, 0);
-            else temp += new Vector2(over.Width, 0);
+            if (over.Width != 0)
+            {
+                if (Position.X < other.X) Move(-1, 0, over.Width);
+                else Move(1, 0, over.Width);
+            }
 
-            CorrectParent();
-
-            if (temp.Y < other.Y) temp -= new Vector2(0, over.Height);
-            else temp += new Vector2(0, over.Height);
-
-            CorrectParent();
-
-            if (position == temp) return;
-            position = temp;
-            position = CorrectNew(position);
+            if (over.Height != 0)
+            {
+                if (Position.Y < other.Y) Move(0, -1, over.Height);
+                else Move(0, 1, over.Height);
+            }
         }
 
         public void Correct(int flag, int checkDistance = 2)
