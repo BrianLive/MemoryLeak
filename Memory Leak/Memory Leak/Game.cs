@@ -1,3 +1,4 @@
+using MemoryLeak.Audio;
 using MemoryLeak.Core;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -67,6 +68,8 @@ namespace MemoryLeak
 
         private static State LoadDebugMap()
         {
+            Resource<Sound>.Get("1").Play(); //lmao
+
             var chunk = new Chunk(32, 32);
             var camera = new Camera();
 
