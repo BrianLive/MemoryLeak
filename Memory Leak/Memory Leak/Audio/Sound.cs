@@ -10,14 +10,23 @@ namespace MemoryLeak.Audio
     internal class Sound
     {
         private WaveOutEvent waveOut = new WaveOutEvent();
+        private LoopStream loop;
+
+        public bool IsLooped
+        {
+            set { loop.EnableLooping = value; }
+            get { return loop.EnableLooping; }
+        }
 
         private Sound(Stream stream)
         {
             WaveStream waveStream = new WaveFileReader(stream);
             WaveChannel32 waveChannel = new WaveChannel32(waveStream);
 
-            LoopStream loop = new LoopStream(waveStream);
+            loop = new LoopStream(waveStream);
             waveOut.Init(loop);
+
+            IsLooped = false;
         }
 
         public void Play()
