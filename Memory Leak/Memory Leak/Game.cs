@@ -68,7 +68,7 @@ namespace MemoryLeak
 
         private static State LoadDebugMap()
         {
-            Resource<Sound>.Get("1").Play(); //lmao
+            Resource<Sound>.Get("austin_beatbox").Play(); //lmao
 
             var chunk = new Chunk(32, 32);
             var camera = new Camera();

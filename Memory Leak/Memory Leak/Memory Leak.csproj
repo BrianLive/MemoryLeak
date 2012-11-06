@@ -88,6 +88,8 @@
     <Compile Include="Program.cs" />
     <Compile Include="Game.cs" />
     <Compile Include="Resource.cs" />
+    <Compile Include="Utility\MathHelper.cs" />
+    <Compile Include="Utility\RandomWrapper.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Memory LeakContent\Memory LeakContent.contentproj">
