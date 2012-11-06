@@ -13,7 +13,6 @@ namespace MemoryLeak.Core
         public Chunk Parent { get; set; }
         public bool IsPassable { get; set; }
         public bool IsWalkable { get; set; }
-        public int Depth { get; set; }
 
         public Chunk.Tile ParentTile
         {
@@ -54,16 +53,61 @@ namespace MemoryLeak.Core
 
         public void Move(int x, int y, float rate)
         {
-            rate = Math.Abs(rate);
+            /* rate = Math.Abs(rate);
             Position += new Vector2(x * rate, 0); // Adjust Horizontal Movement - Brian
             CorrectParent(); // Determine Parent Tile - Brian
             Correct(0); // Horizontal Collision Pass - Brian
             Position += new Vector2(0, y * rate); // Adjust Vertical Movement - Brian
             CorrectParent();
             Correct(1); // Vertical Collision Pass - Brian
-            Correct(2); // Entity Collision Pass - Brian
+            Correct(2); // Entity Collision Pass - Brian */
 
+            Position += new Vector2(x*rate, y*rate);
+            Position = CorrectNew(Position);
+            CorrectParent();
             if (ParentTile != null) ParentTile.OnStep(this);
+        }
+
+        public Vector2 CorrectNew(Vector2 position)
+        {
+            for(var x = -2; x <= 2; x++)
+                for(var y = -2; y <= 2; y++)
+                {
+                    var tile = Parent.Get((int) Math.Round((position.X + (Width/2))/Width) + x,
+                                          (int) Math.Round((position.Y + (Height/32))/Height) + y, Depth);
+
+                    if(tile == null)
+                    {
+                        var tileLower = Depth == 0 ? null : Parent.Get((int)Math.Round((position.X + (Width / 2)) / Width) + x,
+                        (int)Math.Round((position.Y + (Height / 32)) / Height) + y, Depth - 1);
+
+                        if (tileLower == null || !tileLower.Children.Any(i => i.IsWalkable))
+                        {
+                            var rectangle = new Rectangle((int) Math.Round((position.X + (Width/2))/Width) + x,
+                                                          (int) Math.Round((position.Y + (Height/32))/Height) + y, Width,
+                                                          Height);
+                            if (Rectangle.Intersects(rectangle)) Offset(ref position, rectangle);
+                        }
+                    }
+                    else
+                    {
+                        if (tile.IsPassable) continue;
+                        if (Rectangle.Intersects(tile.Rectangle)) Offset(ref position, tile.Rectangle);
+                    }
+                }
+
+            return position;
+        }
+
+        private void Offset(ref Vector2 position, Rectangle other)
+        {
+            var over = Rectangle.Intersect(Rectangle, other);
+
+            if(position.X < other.X) position -= new Vector2(over.Width, 0);
+            else position += new Vector2(over.Width, 0);
+
+            if (position.Y < other.Y) position -= new Vector2(0, over.Height);
+            else position += new Vector2(0, over.Height);
         }
 
         public void Correct(int flag, int checkDistance = 2)
