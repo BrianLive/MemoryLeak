@@ -79,6 +79,8 @@ namespace MemoryLeak
             player.Tick += sender =>
                                {
                                    var k = Keyboard.GetState();
+                                   var isRunning = k.IsKeyDown(Keys.LeftShift);
+
                                    foreach (var i in k.GetPressedKeys())
                                    {
                                        var move = Vector2.Zero;
@@ -99,7 +101,7 @@ namespace MemoryLeak
                                                break;
                                        }
 
-                                       player.Move((int)move.X, (int)move.Y, 1);
+                                       player.Move((int)move.X, (int)move.Y, isRunning ? 5 : 1);
 
                                        if (move != Vector2.Zero) camera.Position = player.Position;
                                    }
