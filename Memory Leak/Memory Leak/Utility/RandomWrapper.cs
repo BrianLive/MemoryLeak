@@ -17,7 +17,7 @@ namespace MemoryLeak.Utility
 
         public static float Range()
         {
-            return Range(0f, 1f);
+            return (float)_random.NextDouble();
         }
 
         public static int Range(int max)

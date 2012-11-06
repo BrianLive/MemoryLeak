@@ -1,5 +1,6 @@
 using MemoryLeak.Audio;
 using MemoryLeak.Core;
+using MemoryLeak.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -76,7 +77,7 @@ namespace MemoryLeak
 
             for (var x = 0; x < chunk.Width; x++)
                 for (var y = 0; y < chunk.Height; y++ )
-                    chunk.Set(x, y, 0, new Chunk.Tile(Resource<Texture2D>.Get("debug")) {IsPassable = true});
+                    if (RandomWrapper.Range() > 0.5) chunk.Set(x, y, 0, new Chunk.Tile(Resource<Texture2D>.Get("debug")) {IsPassable = true});
 
             var player = new Entity(Resource<Texture2D>.Get("debug-entity"), 4, 4, 0);
 
