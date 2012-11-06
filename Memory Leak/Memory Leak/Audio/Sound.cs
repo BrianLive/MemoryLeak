@@ -9,27 +9,24 @@ namespace MemoryLeak.Audio
 {
     class Sound
     {
-        public Sound(Stream r)
-        {
-            //fix this plz
+        private WaveOutEvent _waveOutDevice = new WaveOutEvent();
+        private WaveChannel32 _inputStream;
 
-            /*WaveChannel32 inputStream;
-            if (fileName.EndsWith(".mp3"))
-            {
-                WaveStream mp3Reader = new FileReader(r);
-                inputStream = new WaveChannel32(mp3Reader);
-            }
-            else
-            {
-                throw new InvalidOperationException("Unsupported extension");
-            }
-            volumeStream = inputStream;
-            return volumeStream;*/
+        private Sound(Stream stream) //Oh my god this is so clever, a private constructor means that nobody can go create sounds like a fucking bitch and use up precious resources, but this'll force you to use FromStream to create sounds so that's just fucking plain perfect!
+        {
+            WaveStream waveStream = new WaveFileReader(stream);
+            _inputStream = new WaveChannel32(waveStream);
         }
 
-        public static Sound FromStream(Stream r)
+        public void Play()
         {
-            return new Sound(r);
+            _waveOutDevice.Init(_inputStream);
+            _waveOutDevice.Play();
+        }
+
+        public static Sound FromStream(Stream stream)
+        {
+            return new Sound(stream);
         }
     }
 }
