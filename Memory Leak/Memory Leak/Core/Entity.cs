@@ -32,7 +32,7 @@ namespace MemoryLeak.Core
             }
         }
 
-        public event Delegates.EntityHandler Death, Tick, Collision;
+        public event Action<Drawable> Death, Tick, Collision;
 
         public Entity(Texture2D texture, int x, int y, bool isPassable = false)
             : base(texture)
