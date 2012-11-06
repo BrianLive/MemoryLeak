@@ -53,22 +53,16 @@ namespace MemoryLeak.Core
 
         public void Move(int x, int y, float rate)
         {
-            /* rate = Math.Abs(rate);
-            Position += new Vector2(x * rate, 0); // Adjust Horizontal Movement - Brian
-            CorrectParent(); // Determine Parent Tile - Brian
-            Correct(0); // Horizontal Collision Pass - Brian
-            Position += new Vector2(0, y * rate); // Adjust Vertical Movement - Brian
+            Position += new Vector2(x*rate, 0);
             CorrectParent();
-            Correct(1); // Vertical Collision Pass - Brian
-            Correct(2); // Entity Collision Pass - Brian */
-
-            Position += new Vector2(x*rate, y*rate);
+            CorrectNew(0);
+            Position += new Vector2(0, y*rate);
             CorrectParent();
-            CorrectNew();
+            CorrectNew(1);
             if (ParentTile != null) ParentTile.OnStep(this);
         }
 
-        public void CorrectNew()
+        public void CorrectNew(int flag)
         {
             for(var x = -2; x <= 2; x++)
                 for(var y = -2; y <= 2; y++)
@@ -87,10 +81,9 @@ namespace MemoryLeak.Core
                                                           (int) (Math.Round(CenterPosition.Y/Height) + y) * Height, Width,
                                                           Height);
 
+                            Console.WriteLine("player: " + Rectangle + "; null tile: " + rectangle);
                             if (Rectangle.Intersects(rectangle))
-                            {
-                                Offset(rectangle);
-                            }
+                                Offset(flag, rectangle);
                         }
                         else if(tileLower.IsRamp)
                         {
@@ -98,25 +91,23 @@ namespace MemoryLeak.Core
                         }
                     }
                     else if (!tile.IsPassable && Rectangle.Intersects(tile.Rectangle))
-                    {
-                        Offset(tile.Rectangle);
-                    }
+                        Offset(flag, tile.Rectangle);
                 }
         }
 
-        private void Offset(Rectangle other)
+        private void Offset(int flag, Rectangle other)
         {
             var over = Rectangle.Intersect(Rectangle, other);
 
-            if (over.Width != 0)
+            if (over.Width != 0 && flag == 0)
             {
-                if (Position.X < other.X) Move(-1, 0, over.Width);
+                if (CenterPosition.X < other.X) Move(-1, 0, over.Width);
                 else Move(1, 0, over.Width);
             }
 
-            if (over.Height != 0)
+            if (over.Height != 0 && flag == 1)
             {
-                if (Position.Y < other.Y) Move(0, -1, over.Height);
+                if (CenterPosition.Y < other.Y) Move(0, -1, over.Height);
                 else Move(0, 1, over.Height);
             }
         }
@@ -168,20 +159,25 @@ namespace MemoryLeak.Core
                     }
                     else
                     {
-                        if (tile == null || !tile.Rectangle.Intersects(Rectangle)) continue;
-
-                        if (!tile.IsPassable)
+                        if (tile == null || !tile.IsPassable)
                         {
-                            var over = Rectangle.Intersect(Rectangle, tile.Rectangle);
+                            var rectangle = tile == null
+                                                ? new Rectangle((int) (Math.Round(CenterPosition.X/Width) + xx)*Width,
+                                                                (int) (Math.Round(CenterPosition.Y/Height) + yy)*Height,
+                                                                Width,
+                                                                Height)
+                                                : tile.Rectangle;
+
+                            var over = Rectangle.Intersect(Rectangle, rectangle);
 
                             switch (flag)
                             {
                                 case 0:
-                                    if (CenterPosition.X < tile.CenterPosition.X) Move(-1, 0, over.Width);
+                                    if (CenterPosition.X < rectangle.X) Move(-1, 0, over.Width);
                                     else Move(1, 0, over.Width);
                                     break;
                                 case 1:
-                                    if (CenterPosition.Y < tile.CenterPosition.Y) Move(0, -1, over.Height);
+                                    if (CenterPosition.Y < rectangle.Y) Move(0, -1, over.Height);
                                     else Move(0, 1, over.Height);
                                     break;
                             }

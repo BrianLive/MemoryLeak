@@ -37,7 +37,5 @@ namespace MemoryLeak.Graphics
         {
             if (Texture != null) spriteBatch.Draw(Texture, Rectangle, null, Color, Rotation, Origin, SpriteEffects.None, Depth / (float)int.MaxValue);
         }
-
-        
     }
 }
