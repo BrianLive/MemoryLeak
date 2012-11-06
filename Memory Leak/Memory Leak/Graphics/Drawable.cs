@@ -10,7 +10,10 @@ namespace MemoryLeak.Graphics
 
         public Texture2D Texture { get; set; }
         public Vector2 Position { get; set; }
+        public Vector2 Origin { get; set; }
+        public float Rotation { get; set; }
         public int Depth { get; set; }
+        public Color Color { get; set; }
 
         public Rectangle Rectangle
         {
@@ -26,11 +29,15 @@ namespace MemoryLeak.Graphics
         {
             Texture = texture;
             Position = Vector2.Zero;
+            Origin = Vector2.Zero;
+            Color = Color.White;
         }
 
         public virtual void Draw(SpriteBatch spriteBatch)
         {
-            if (Texture != null) spriteBatch.Draw(Texture, Rectangle, Color.White);
+            if (Texture != null) spriteBatch.Draw(Texture, Rectangle, null, Color, Rotation, Origin, SpriteEffects.None, Depth / (float)int.MaxValue);
         }
+
+        
     }
 }
