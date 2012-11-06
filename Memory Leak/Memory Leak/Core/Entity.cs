@@ -63,8 +63,8 @@ namespace MemoryLeak.Core
             Correct(2); // Entity Collision Pass - Brian */
 
             Position += new Vector2(x*rate, y*rate);
-            Position = CorrectNew(Position);
             CorrectParent();
+            Position = CorrectNew(Position);
             if (ParentTile != null) ParentTile.OnStep(this);
         }
 
@@ -73,27 +73,26 @@ namespace MemoryLeak.Core
             for(var x = -2; x <= 2; x++)
                 for(var y = -2; y <= 2; y++)
                 {
-                    var tile = Parent.Get((int) Math.Round((position.X + (Width/2))/Width) + x,
-                                          (int) Math.Round((position.Y + (Height/32))/Height) + y, Depth);
+                    var tile = Parent.Get((int)Math.Round(CenterPosition.X / Width) + x,
+                                          (int)Math.Round(CenterPosition.Y / Height) + y, Depth);
 
-                    if(tile == null)
+                    if (tile == null) Console.WriteLine(x + ", " + y + ": null");
+
+                    if (tile == null)
                     {
                         var tileLower = Depth == 0 ? null : Parent.Get((int)Math.Round((position.X + (Width / 2)) / Width) + x,
                         (int)Math.Round((position.Y + (Height / 32)) / Height) + y, Depth - 1);
 
                         if (tileLower == null || !tileLower.Children.Any(i => i.IsWalkable))
                         {
-                            var rectangle = new Rectangle((int) Math.Round((position.X + (Width/2))/Width) + x,
-                                                          (int) Math.Round((position.Y + (Height/32))/Height) + y, Width,
+                            var rectangle = new Rectangle((int)Math.Round((position.X + (Width / 2)) / Width) + x,
+                                                          (int)Math.Round((position.Y + (Height / 32)) / Height) + y, Width,
                                                           Height);
                             if (Rectangle.Intersects(rectangle)) Offset(ref position, rectangle);
                         }
                     }
-                    else
-                    {
-                        if (tile.IsPassable) continue;
-                        if (Rectangle.Intersects(tile.Rectangle)) Offset(ref position, tile.Rectangle);
-                    }
+                    else if (!tile.IsPassable && Rectangle.Intersects(tile.Rectangle))
+                        Offset(ref position, tile.Rectangle);
                 }
 
             return position;
@@ -102,12 +101,21 @@ namespace MemoryLeak.Core
         private void Offset(ref Vector2 position, Rectangle other)
         {
             var over = Rectangle.Intersect(Rectangle, other);
+            var temp = new Vector2(position.X, position.Y);
 
-            if(position.X < other.X) position -= new Vector2(over.Width, 0);
-            else position += new Vector2(over.Width, 0);
+            if(temp.X < other.X) temp -= new Vector2(over.Width, 0);
+            else temp += new Vector2(over.Width, 0);
 
-            if (position.Y < other.Y) position -= new Vector2(0, over.Height);
-            else position += new Vector2(0, over.Height);
+            CorrectParent();
+
+            if (temp.Y < other.Y) temp -= new Vector2(0, over.Height);
+            else temp += new Vector2(0, over.Height);
+
+            CorrectParent();
+
+            if (position == temp) return;
+            position = temp;
+            position = CorrectNew(position);
         }
 
         public void Correct(int flag, int checkDistance = 2)

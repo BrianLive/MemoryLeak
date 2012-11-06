@@ -51,7 +51,7 @@ namespace MemoryLeak.Core
 
             for (var x = 0; x < width; x++)
                 for (var y = 0; y < height; y++)
-                    _tiles[x, y, 0] = new Tile(Resource<Texture2D>.Get("debug")) { IsPassable = true };
+                    _tiles[x, y, 0] = null;
         }
 
         public void Add(Entity entity)
