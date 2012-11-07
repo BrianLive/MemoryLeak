@@ -60,12 +60,12 @@ namespace MemoryLeak.Core
 
             Position += new Vector2(x*rate, y*rate);
             CorrectParent();
-            CorrectNew();
+            Correct();
 
             if (ParentTile != null) ParentTile.OnStep(this);
         }
 
-        public void CorrectNew()
+        public void Correct()
         {
             for(var x = -2; x <= 2; x++)
                 for(var y = -2; y <= 2; y++)
@@ -142,82 +142,6 @@ namespace MemoryLeak.Core
 
                 if (Rectangle.Intersects(other)) Offset(other);
             }
-        }
-
-        public void Correct(int flag, int checkDistance = 2)
-        {
-            // Check Distance is the amount of tiles out that we want to check - Brian
-            for (var xx = -checkDistance; xx <= checkDistance; xx++)
-                for (var yy = -checkDistance; yy <= checkDistance; yy++)
-                {
-                    var tile = Parent.Get((int)(Math.Round(CenterPosition.X / Width) + xx),
-                                          (int)(Math.Round(CenterPosition.Y / Height) + yy), Depth);
-
-                    if (flag == 2) // Entity Collision Pass - Brian
-                    {
-                        if (tile == null) continue; // If this tile doesn't exist, move to the next tile. - Brian
-
-                        /* We cannot modify an active list
-                         * So we duplicate it and make our changes to the duplicate
-                         * Later on in the code we apply these changes to the old list, while it is inactive. 
-                         * - Brian*/
-                        var duplicate = new Entity[tile.Children.Count];
-                        tile.Children.CopyTo(duplicate);
-
-                        foreach (var i in duplicate.Where(i => i != this && i.Rectangle.Intersects(Rectangle)))
-                        {
-                            i.OnCollision(this);
-                            OnCollision(i);
-                        }
-
-                        foreach (var i in duplicate.Where(i => i != this && i.Rectangle.Intersects(Rectangle) && !i.IsPassable))
-                        {
-                            var overEnt = Rectangle.Intersect(Rectangle, i.Rectangle);
-                            var entityDirection = (overEnt.Width < overEnt.Height);
-
-                            Entity pusher = this, pushee = i;
-
-                            if (entityDirection)
-                            {
-                                if (pusher.CenterPosition.X < pushee.CenterPosition.X) pushee.Move(1, 0, overEnt.Width);
-                                else pushee.Move(-1, 0, overEnt.Width);
-                            }
-                            else
-                            {
-                                if (pusher.Position.Y < pushee.CenterPosition.Y) pushee.Move(0, 1, overEnt.Height);
-                                else pushee.Move(0, -1, overEnt.Height);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        if (tile == null || !tile.IsPassable)
-                        {
-                            var rectangle = tile == null
-                                                ? new Rectangle((int) ((Math.Round(CenterPosition.X/Width) + xx)*Width),
-                                                                (int)
-                                                                ((Math.Round(CenterPosition.Y/Height) + yy)*Height),
-                                                                (int) Width,
-                                                                (int) Height)
-                                                : tile.Rectangle;
-
-                            var over = Rectangle.Intersect(Rectangle, rectangle);
-
-                            switch (flag)
-                            {
-                                case 0:
-                                    if (CenterPosition.X < rectangle.X) Move(-1, 0, over.Width);
-                                    else Move(1, 0, over.Width);
-                                    break;
-                                case 1:
-                                    if (CenterPosition.Y < rectangle.Y) Move(0, -1, over.Height);
-                                    else Move(0, 1, over.Height);
-                                    break;
-                            }
-                        }
-                        else tile.OnStep(this);
-                    }
-                }
         }
 
         public void CorrectParent()

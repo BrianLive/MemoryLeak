@@ -76,7 +76,6 @@ namespace MemoryLeak
 
                 frameTime -= deltaTime;
                 stepCounter++;
-
             }
         }
 
@@ -105,35 +104,34 @@ namespace MemoryLeak
             var player = new Entity(Resource<Texture2D>.Get("debug-entity"), RandomWrapper.Range(10), RandomWrapper.Range(10), 0);
 
             player.Tick += dt =>
-                               {
-                                   var k = Keyboard.GetState();
-                                   var isRunning = k.IsKeyDown(Keys.LeftShift);
+            {
+                var k = Keyboard.GetState();
+                var isRunning = k.IsKeyDown(Keys.LeftShift);
 
-                                   var move = Vector2.Zero;
+                var move = Vector2.Zero;
 
-                                   foreach (var i in k.GetPressedKeys())
-                                   {
-                                       switch(i)
-                                       {
-                                           case Keys.W:
-                                               move.Y = -1;
-                                               break;
-                                           case Keys.S:
-                                               move.Y = 1;
-                                               break;
-                                           case Keys.A:
-                                               move.X = -1;
-                                               break;
-                                           case Keys.D:
-                                               move.X = 1;
-                                               break;
-                                       }
-                                   }
+                foreach (var i in k.GetPressedKeys())
+                {
+                    switch(i)
+                    {
+                        case Keys.W:
+                            move.Y = -1;
+                            break;
+                        case Keys.S:
+                            move.Y = 1;
+                            break;
+                        case Keys.A:
+                            move.X = -1;
+                            break;
+                        case Keys.D:
+                            move.X = 1;
+                            break;
+                    }
+                }
 
-                                   Console.WriteLine(dt);
-                                   player.Move((int) move.X, (int) move.Y, (isRunning ? 300 : 100) * dt);
-                                   camera.Position = player.Position;
-                               };
+                player.Move((int) move.X, (int) move.Y, (isRunning ? 300 : 100) * dt);
+                camera.Position = player.Position;
+            };
 
             chunk.Add(player);
 
