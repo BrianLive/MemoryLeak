@@ -84,6 +84,7 @@
     <Compile Include="Audio\Sound.cs" />
     <Compile Include="Core\Camera.cs" />
     <Compile Include="Core\Chunk.cs" />
+    <Compile Include="Graphics\DebugRectangle.cs" />
     <Compile Include="Graphics\Drawable.cs" />
     <Compile Include="Core\Entity.cs" />
     <Compile Include="Core\State.cs" />

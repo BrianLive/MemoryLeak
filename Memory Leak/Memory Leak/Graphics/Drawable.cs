@@ -5,8 +5,8 @@ namespace MemoryLeak.Graphics
 {
     public class Drawable
     {
-        public const int Width = 32;
-        public const int Height = 32;
+        public float Width = 32;
+        public float Height = 32;
 
         public Texture2D Texture { get; set; }
         public Vector2 Position { get; set; }
@@ -17,7 +17,7 @@ namespace MemoryLeak.Graphics
 
         public Rectangle Rectangle
         {
-            get { return new Rectangle((int)Position.X, (int)Position.Y, Width, Height); }
+            get { return new Rectangle((int)Position.X, (int)Position.Y, (int)Width, (int)Height); }
         }
 
         public Vector2 CenterPosition

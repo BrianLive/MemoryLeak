@@ -10,6 +10,9 @@ namespace MemoryLeak.Core
     {
         public class Tile : Drawable
         {
+            public new const float Width = 32;
+            public new const float Height = 32;
+
             public bool IsPassable { get; set; }
             public bool IsRamp { get; set; }
 
@@ -34,6 +37,7 @@ namespace MemoryLeak.Core
 
         private readonly Tile[,,] _tiles;
         private readonly List<Entity> _entities = new List<Entity>();
+        private readonly List<DebugRectangle> _debuggers = new List<DebugRectangle>();
 
         public int Width { get; private set; }
         public int Height { get; private set; }
@@ -59,6 +63,7 @@ namespace MemoryLeak.Core
             _entities.Add(entity);
             entity.Parent = this;
             entity.CorrectParent();
+            _debuggers.Add(entity.One);
         }
 
         public void Remove(Entity entity)
@@ -73,7 +78,7 @@ namespace MemoryLeak.Core
             z = Math.Max(0, z);
 
             _tiles[x, y, z] = tile;
-            tile.Position = new Vector2(x * Drawable.Width, y * Drawable.Height);
+            tile.Position = new Vector2(x * Tile.Width, y * Tile.Height);
             tile.Parent = this;
         }
 
@@ -85,8 +90,8 @@ namespace MemoryLeak.Core
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            var xSize = (int)(Parent.Camera.Position.X - (Game.Core.Resolution.X / 2)) / Drawable.Width;
-            var ySize = (int)(Parent.Camera.Position.Y - (Game.Core.Resolution.Y / 2)) / Drawable.Height;
+            var xSize = (int)(Parent.Camera.Position.X - (Game.Core.Resolution.X / 2)) / (int)Tile.Width;
+            var ySize = (int)(Parent.Camera.Position.Y - (Game.Core.Resolution.Y / 2)) / (int)Tile.Height;
 
             for (var x = xSize; x < xSize + (Game.Core.Resolution.X / 2); x++)
                 for (var y = ySize; y < ySize + (Game.Core.Resolution.Y / 2); y++)
@@ -96,6 +101,9 @@ namespace MemoryLeak.Core
                                 _tiles[x, y, z].Draw(spriteBatch);
 
             foreach (var i in _entities)
+                i.Draw(spriteBatch);
+
+            foreach (var i in _debuggers)
                 i.Draw(spriteBatch);
         }
 

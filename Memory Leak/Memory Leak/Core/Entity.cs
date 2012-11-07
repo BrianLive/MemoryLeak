@@ -14,6 +14,9 @@ namespace MemoryLeak.Core
         public bool IsPassable { get; set; }
         public bool IsWalkable { get; set; }
 
+        public readonly DebugRectangle One = new DebugRectangle();
+        private DebugRectangle two = new DebugRectangle(), three = new DebugRectangle();
+
         public Chunk.Tile ParentTile
         {
             get { return _parentTile; }
@@ -53,16 +56,16 @@ namespace MemoryLeak.Core
 
         public void Move(int x, int y, float rate)
         {
-            Position += new Vector2(x*rate, 0);
+            rate = Math.Abs(rate);
+
+            Position += new Vector2(x*rate, y*rate);
             CorrectParent();
-            CorrectNew(0);
-            Position += new Vector2(0, y*rate);
-            CorrectParent();
-            CorrectNew(1);
+            CorrectNew();
+
             if (ParentTile != null) ParentTile.OnStep(this);
         }
 
-        public void CorrectNew(int flag)
+        public void CorrectNew()
         {
             for(var x = -2; x <= 2; x++)
                 for(var y = -2; y <= 2; y++)
@@ -70,45 +73,50 @@ namespace MemoryLeak.Core
                     var tile = Parent.Get((int)Math.Round(CenterPosition.X / Width) + x,
                                           (int)Math.Round(CenterPosition.Y / Height) + y, Depth);
 
+                    Rectangle rectangle;
+
                     if (tile == null)
+                        rectangle = new Rectangle((int)((Math.Round(CenterPosition.X / Width) + x) * Width),
+                                                  (int)((Math.Round(CenterPosition.Y / Height) + y) * Height),
+                                                  (int)Width,
+                                                  (int)Height);
+                    else rectangle = tile.Rectangle;
+
+                    if (!rectangle.Intersects(Rectangle)) continue;
+
+                    if (tile == null || !tile.IsPassable)
                     {
-                        var tileLower = Depth == 0 ? null : Parent.Get((int)Math.Round((Position.X + (Width / 2)) / Width) + x,
-                        (int)Math.Round((Position.Y + (Height / 32)) / Height) + y, Depth - 1);
-
-                        if (tileLower == null || (!tileLower.Children.Any(i => i.IsWalkable) && !tileLower.IsRamp))
-                        {
-                            var rectangle = new Rectangle((int) (Math.Round(CenterPosition.X/Width) + x) * Width,
-                                                          (int) (Math.Round(CenterPosition.Y/Height) + y) * Height, Width,
-                                                          Height);
-
-                            Console.WriteLine("player: " + Rectangle + "; null tile: " + rectangle);
-                            if (Rectangle.Intersects(rectangle))
-                                Offset(flag, rectangle);
-                        }
-                        else if(tileLower.IsRamp)
-                        {
-                            
-                        }
+                        Offset(rectangle);
                     }
-                    else if (!tile.IsPassable && Rectangle.Intersects(tile.Rectangle))
-                        Offset(flag, tile.Rectangle);
                 }
         }
 
-        private void Offset(int flag, Rectangle other)
+        private void Offset(Rectangle other)
         {
             var over = Rectangle.Intersect(Rectangle, other);
 
-            if (over.Width != 0 && flag == 0)
-            {
-                if (CenterPosition.X < other.X) Move(-1, 0, over.Width);
-                else Move(1, 0, over.Width);
-            }
+            One.Position = new Vector2(over.X, over.Y);
 
-            if (over.Height != 0 && flag == 1)
+            One.Width = over.Width;
+            One.Height = over.Height;
+
+            if(over.Width <= over.Height)
             {
-                if (CenterPosition.Y < other.Y) Move(0, -1, over.Height);
+                var isNegative = CenterPosition.X < (other.X + (other.Width/2));
+
+                if (isNegative) Move(-1, 0, over.Width);
+                else Move(1, 0, over.Width);
+
+                if (Rectangle.Intersects(other)) Offset(other);
+            }
+            else
+            {
+                var isNegative = CenterPosition.Y < (other.Y + (other.Height/2));
+
+                if (isNegative) Move(0, -1, over.Height);
                 else Move(0, 1, over.Height);
+
+                if (Rectangle.Intersects(other)) Offset(other);
             }
         }
 
@@ -118,8 +126,8 @@ namespace MemoryLeak.Core
             for (var xx = -checkDistance; xx <= checkDistance; xx++)
                 for (var yy = -checkDistance; yy <= checkDistance; yy++)
                 {
-                    var tile = Parent.Get((int)Math.Round(CenterPosition.X / Width) + xx,
-                                          (int)Math.Round(CenterPosition.Y / Height) + yy, Depth);
+                    var tile = Parent.Get((int)(Math.Round(CenterPosition.X / Width) + xx),
+                                          (int)(Math.Round(CenterPosition.Y / Height) + yy), Depth);
 
                     if (flag == 2) // Entity Collision Pass - Brian
                     {
@@ -162,10 +170,11 @@ namespace MemoryLeak.Core
                         if (tile == null || !tile.IsPassable)
                         {
                             var rectangle = tile == null
-                                                ? new Rectangle((int) (Math.Round(CenterPosition.X/Width) + xx)*Width,
-                                                                (int) (Math.Round(CenterPosition.Y/Height) + yy)*Height,
-                                                                Width,
-                                                                Height)
+                                                ? new Rectangle((int) ((Math.Round(CenterPosition.X/Width) + xx)*Width),
+                                                                (int)
+                                                                ((Math.Round(CenterPosition.Y/Height) + yy)*Height),
+                                                                (int) Width,
+                                                                (int) Height)
                                                 : tile.Rectangle;
 
                             var over = Rectangle.Intersect(Rectangle, rectangle);
@@ -190,7 +199,7 @@ namespace MemoryLeak.Core
         public void CorrectParent()
         {
             if (Parent == null) return;
-            ParentTile = Parent.Get((int)CenterPosition.X / Width, (int)CenterPosition.Y / Height, Depth);
+            ParentTile = Parent.Get((int)(CenterPosition.X / Width), (int)(CenterPosition.Y / Height), Depth);
         }
 
         public void Update(GameTime gameTime)

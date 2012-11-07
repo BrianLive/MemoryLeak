@@ -79,7 +79,7 @@ namespace MemoryLeak
                 for (var y = 0; y < chunk.Height; y++ )
                     if (RandomWrapper.Range() > 0.5) chunk.Set(x, y, 0, new Chunk.Tile(Resource<Texture2D>.Get("debug")) {IsPassable = true});
 
-            var player = new Entity(Resource<Texture2D>.Get("debug-entity"), 4, 4, 0);
+            var player = new Entity(Resource<Texture2D>.Get("debug-entity"), RandomWrapper.Range(10), RandomWrapper.Range(10), 0);
 
             player.Tick += sender =>
                                {
@@ -106,11 +106,13 @@ namespace MemoryLeak
                                                break;
                                        }
 
-                                       player.Move((int)move.X, (int)move.Y, isRunning ? 5 : 1);
+                                       player.Move((int)move.X, (int)move.Y, isRunning ? 16 : 1);
 
                                        if (move != Vector2.Zero) camera.Position = player.Position;
                                    }
                                };
+
+            camera.Position = player.Position;
 
             chunk.Add(player);
 
