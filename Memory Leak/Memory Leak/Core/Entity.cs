@@ -73,6 +73,39 @@ namespace MemoryLeak.Core
                     var tile = Parent.Get((int)Math.Round(CenterPosition.X / Width) + x,
                                           (int)Math.Round(CenterPosition.Y / Height) + y, Depth);
 
+                    // Entity Pass
+                    if(tile != null)
+                    {
+                        var duplicate = new Entity[tile.Children.Count];
+                        tile.Children.CopyTo(duplicate);
+
+                        foreach (var i in duplicate.Where(i => i != this && i.Rectangle.Intersects(Rectangle)))
+                        {
+                            i.OnCollision(this);
+                            OnCollision(i);
+                        }
+
+                        foreach (var i in duplicate.Where(i => i != this && i.Rectangle.Intersects(Rectangle) && !i.IsPassable))
+                        {
+                            var overEnt = Rectangle.Intersect(Rectangle, i.Rectangle);
+                            var entityDirection = (overEnt.Width < overEnt.Height);
+
+                            Entity pusher = this, pushee = i;
+
+                            if (entityDirection)
+                            {
+                                if (pusher.CenterPosition.X < pushee.CenterPosition.X) pushee.Move(1, 0, overEnt.Width);
+                                else pushee.Move(-1, 0, overEnt.Width);
+                            }
+                            else
+                            {
+                                if (pusher.Position.Y < pushee.CenterPosition.Y) pushee.Move(0, 1, overEnt.Height);
+                                else pushee.Move(0, -1, overEnt.Height);
+                            }
+                        }
+                    }
+
+                    // Tile & Faux-Tile Pass
                     Rectangle rectangle;
 
                     if (tile == null)
