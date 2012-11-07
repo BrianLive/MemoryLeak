@@ -29,8 +29,8 @@ namespace MemoryLeak
         private readonly GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
 
-        private readonly Stopwatch _stopwatch = new Stopwatch();
-        private TimeSpan _previous;
+        //private readonly Stopwatch _stopwatch = new Stopwatch();
+        //private double _previous;
 
         public State CurrentState { get; set; }
 
@@ -41,7 +41,7 @@ namespace MemoryLeak
             _graphics = new GraphicsDeviceManager(this);
             Core.GraphicsDeviceManager = _graphics;
 
-            _stopwatch.Start();
+            //_stopwatch.Start();
         }
 
         protected override void LoadContent()
@@ -57,17 +57,17 @@ namespace MemoryLeak
 
         protected override void Update(GameTime gameTime)
         {
-            _stopwatch.Start();
-            var frametime = _stopwatch.Elapsed - _previous;
+            //double current = _stopwatch.ElapsedTicks / (double)Stopwatch.Frequency; 
 
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
                 Exit();
 
-            CurrentState.Update((float) (frametime.TotalMilliseconds*10));
+            CurrentState.Update((float)(gameTime.ElapsedGameTime.TotalSeconds));
             base.Update(gameTime);
 
-            _previous = _stopwatch.Elapsed;
-            _stopwatch.Reset();
+            //_previous = _stopwatch.ElapsedTicks / (double)Stopwatch.Frequency;
+            //_stopwatch.Restart();
+
         }
 
         protected override void Draw(GameTime gameTime)
@@ -120,7 +120,8 @@ namespace MemoryLeak
                                        }
                                    }
 
-                                   player.Move((int) move.X, (int) move.Y, (isRunning ? 3 : 1) * dt);
+                                   Console.WriteLine(dt);
+                                   player.Move((int) move.X, (int) move.Y, (isRunning ? 300 : 100) * dt);
                                    camera.Position = player.Position;
                                };
 
