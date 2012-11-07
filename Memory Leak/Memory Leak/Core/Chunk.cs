@@ -59,8 +59,8 @@ namespace MemoryLeak.Core
 
         public void Add(Entity entity)
         {
-            _entities.Add(entity);
             entity.Parent = this;
+            _entities.Add(entity);
             entity.CorrectParent();
         }
 

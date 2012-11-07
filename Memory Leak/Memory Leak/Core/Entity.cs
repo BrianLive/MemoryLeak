@@ -15,6 +15,24 @@ namespace MemoryLeak.Core
         public bool IsPassable { get; set; }
         public bool IsWalkable { get; set; }
 
+        public new Vector2 Position
+        {
+            get { return base.Position; }
+            set
+            {
+                base.Position += value;
+
+                if(Parent != null)
+                {
+                    CorrectParent();
+                    Correct();
+                }
+                
+
+                if (ParentTile != null) ParentTile.OnStep(this);
+            }
+        }
+
         public Chunk.Tile ParentTile
         {
             get { return _parentTile; }
@@ -53,26 +71,16 @@ namespace MemoryLeak.Core
             Parent.Remove(this);
         }
 
-        public void Move(int x, int y, float rate)
-        {
-            rate = Math.Abs(rate);
-
-            Position += new Vector2(x*rate, y*rate);
-            CorrectParent();
-            Correct();
-
-            if (ParentTile != null) ParentTile.OnStep(this);
-        }
-
         public void Correct()
         {
             Vector2 correction = new Vector2();
 
-            for(var x = -2; x <= 2; x++)
-                for(var y = -2; y <= 2; y++)
+            for (var x = (int)Math.Round(Rectangle.X / Chunk.Tile.Width) - 1; x <= Math.Round(Rectangle.Right / Chunk.Tile.Width) + 1; x++)
+                for (var y = (int)Math.Round(Rectangle.Y / Chunk.Tile.Height) - 1; y <= Math.Round(Rectangle.Bottom / Chunk.Tile.Height) + 1; y++)
                 {
-                    var tile = Parent.Get((int)Math.Round(CenterPosition.X / Width) + x,
-                                          (int)Math.Round(CenterPosition.Y / Height) + y, Depth);
+                    var tile = Parent != null
+                                   ? Parent.Get(x, y, Depth)
+                                   : null;
 
                     // Entity Pass
                     /*if(tile != null)
@@ -99,10 +107,10 @@ namespace MemoryLeak.Core
                                                    Height);
                     else rectangle = tile.Rectangle;
 
-                    if (!rectangle.IntersectsWith(Rectangle)) continue;
-
-                    if (tile == null || !tile.IsPassable)
+                    if (rectangle.IntersectsWith(Rectangle))
                     {
+                        if(tile != null && tile.IsPassable) continue;
+
                         var offset = Offset(Rectangle, rectangle);
 
                         if (Math.Abs(offset.X) > Math.Abs(correction.X)) correction.X = offset.X;
@@ -110,7 +118,7 @@ namespace MemoryLeak.Core
                     }
                 }
 
-            Position += correction;
+            if(correction != Vector2.Zero) Position += correction;
         }
 
         private Vector2 Offset(RectangleF sender, RectangleF other)

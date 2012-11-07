@@ -99,7 +99,7 @@ namespace MemoryLeak
 
             for (var x = 0; x < chunk.Width; x++)
                 for (var y = 0; y < chunk.Height; y++ )
-                    if (RandomWrapper.Range() > 0.2) chunk.Set(x, y, 0, new Chunk.Tile(Resource<Texture2D>.Get("debug")) {IsPassable = true});
+                    if (RandomWrapper.Range() > 0.0) chunk.Set(x, y, 0, new Chunk.Tile(Resource<Texture2D>.Get("debug")) {IsPassable = true});
 
             var player = new Entity(Resource<Texture2D>.Get("debug-entity"), RandomWrapper.Range(10), RandomWrapper.Range(10), 0);
 
@@ -129,7 +129,7 @@ namespace MemoryLeak
                     }
                 }
 
-                player.Move((int) move.X, (int) move.Y, (isRunning ? 300 : 100) * dt);
+                player.Position += new Vector2((200 * move.X) * dt, (200 * move.Y) * dt);
                 player.Position = new Vector2((float)Math.Round(player.Position.X), (float)Math.Round(player.Position.Y));
                 camera.Position = player.Position;
             };
