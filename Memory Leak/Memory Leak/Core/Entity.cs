@@ -39,7 +39,7 @@ namespace MemoryLeak.Core
         public event Action<float> Tick;
 
         private RectangleF _previousCollisionRect;
-        private int iterations;
+        private int _iterations;
 
         public Entity(Texture2D texture, int x, int y, int z, bool isPassable = false)
             : base(texture)
@@ -110,21 +110,32 @@ namespace MemoryLeak.Core
 
         private void Offset(RectangleF other)
         {
-            iterations++;
-            if (iterations > 1000) //Avoid stack overflow
+            _iterations++;
+            if (_iterations > 500)
+            {
+                //Avoid stack overflow
+                Console.WriteLine("simulated stack overflow");
+                Console.WriteLine("other: " + other);
+                Console.WriteLine("me: " + Rectangle);
+                Console.WriteLine("intersect:" + RectangleF.Intersect(Rectangle, other));
                 return;
+            }
 
             var over = RectangleF.Intersect(Rectangle, other);
 
-            if(over.Width < over.Height) OffsetDirection(true, other, over);
-            else if(over.Width > over.Height) OffsetDirection(false, other, over);
-            else if(Math.Abs(over.Width - over.Height) < float.Epsilon) 
-                if(!_previousCollisionRect.IsEmpty)
-                    if(_previousCollisionRect.Width < _previousCollisionRect.Height)
+            if (over.Width < over.Height) OffsetDirection(true, other, over);
+            else if (over.Width > over.Height) OffsetDirection(false, other, over);
+            else if (Math.Abs(over.Width - over.Height) < float.Epsilon)
+            {
+                if (!_previousCollisionRect.IsEmpty)
+                {
+                    if (_previousCollisionRect.Width < _previousCollisionRect.Height)
                         OffsetDirection(true, other, over);
                     else if (_previousCollisionRect.Width > _previousCollisionRect.Height)
                         OffsetDirection(false, other, over);
-            
+                }
+            }
+
             _previousCollisionRect = over;
         }
 
@@ -133,7 +144,6 @@ namespace MemoryLeak.Core
             if (isHorizontal)
             {
                 var isNegative = CenterPosition.X < (other.X + (other.Width / 2));
-
                 if (isNegative) Move(-1, 0, over.Width);
                 else Move(1, 0, over.Width);
 
@@ -142,7 +152,6 @@ namespace MemoryLeak.Core
             else
             {
                 var isNegative = CenterPosition.Y < (other.Y + (other.Height/2));
-
                 if (isNegative) Move(0, -1, over.Height);
                 else Move(0, 1, over.Height);
 
@@ -158,7 +167,8 @@ namespace MemoryLeak.Core
 
         public void Update(float delta)
         {
-            iterations = 0; //We allocate 1000 iterations per update, so reset it here
+            _previousCollisionRect = new RectangleF();
+            _iterations = 0; //We allocate 1000 iterations per update, so reset it here
             if (Tick != null) Tick(delta);
         }
 
