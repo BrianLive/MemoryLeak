@@ -29,9 +29,6 @@ namespace MemoryLeak
         private readonly GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
 
-        //private readonly Stopwatch _stopwatch = new Stopwatch();
-        //private double _previous;
-
         public State CurrentState { get; set; }
 
         public Game()
@@ -40,8 +37,6 @@ namespace MemoryLeak
 
             _graphics = new GraphicsDeviceManager(this);
             Core.GraphicsDeviceManager = _graphics;
-
-            //_stopwatch.Start();
         }
 
         protected override void LoadContent()
@@ -57,18 +52,16 @@ namespace MemoryLeak
 
         protected override void Update(GameTime gameTime)
         {
-            //double current = _stopwatch.ElapsedTicks / (double)Stopwatch.Frequency; 
-
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
                 Exit();
 
-            float maxDT = 1 / 60.0f; //Our max deltatime
-            int maxSteps = 10; //Limit the amount of times we update the game per frame
+            const float maxDt = 1 / 60.0f; //Our max deltatime
+            const int maxSteps = 10; //Limit the amount of times we update the game per frame
             int stepCounter = 0;
 
             float frameTime = (float)(gameTime.ElapsedGameTime.TotalSeconds);
 
-            while (frameTime > 0) //Clever timestep shit stolen from http://gafferongames.com/game-physics/fix-your-timestep/ (and also from Froid and Space Hazard)
+            while (frameTime > 0) // fuck your comments
             {
                 if (stepCounter >= maxSteps)
                 {
@@ -76,7 +69,7 @@ namespace MemoryLeak
                     break; //Avoid spiral of death by slowing simulation down
                 }
 
-                float deltaTime = Math.Min(frameTime, maxDT);
+                float deltaTime = Math.Min(frameTime, maxDt);
 
                 CurrentState.Update(deltaTime);
                 base.Update(gameTime);
@@ -85,10 +78,6 @@ namespace MemoryLeak
                 stepCounter++;
 
             }
-
-            //_previous = _stopwatch.ElapsedTicks / (double)Stopwatch.Frequency;
-            //_stopwatch.Restart();
-
         }
 
         protected override void Draw(GameTime gameTime)
