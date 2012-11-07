@@ -96,10 +96,13 @@ namespace MemoryLeak.Core
 
             if(over.Width < over.Height) OffsetDirection(true, other, over);
             else if(over.Width > over.Height) OffsetDirection(false, other, over);
-            else if(over.Width == over.Height) if(!_previousCollisionRect.IsEmpty)
-            if(_previousCollisionRect.Width < over.Height) OffsetDirection(true, other, over);
-            else if(_previousCollisionRect.Width > over.Height) OffsetDirection(false, other, over);
-
+            else if(over.Width == over.Height) 
+                if(!_previousCollisionRect.IsEmpty)
+                    if(_previousCollisionRect.Width < _previousCollisionRect.Height)
+                        OffsetDirection(true, other, over);
+                    else if (_previousCollisionRect.Width > _previousCollisionRect.Height)
+                        OffsetDirection(false, other, over);
+            
             _previousCollisionRect = over;
         }
 
