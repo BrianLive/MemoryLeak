@@ -1,4 +1,5 @@
-using MemoryLeak.Audio;
+using System;
+using System.Diagnostics;
 using MemoryLeak.Core;
 using MemoryLeak.Utility;
 using Microsoft.Xna.Framework;
@@ -25,17 +26,22 @@ namespace MemoryLeak
             }
         }
 
-        readonly GraphicsDeviceManager _graphics;
-        SpriteBatch _spriteBatch;
+        private readonly GraphicsDeviceManager _graphics;
+        private SpriteBatch _spriteBatch;
+
+        private readonly Stopwatch _stopwatch = new Stopwatch();
+        private TimeSpan _previous;
 
         public State CurrentState { get; set; }
 
         public Game()
         {
-            // DON'T DO INITIALIZATION STUFF HERE, DO IT IN LOAD CONTENT gosh - Brian
+            IsFixedTimeStep = false;
+
             _graphics = new GraphicsDeviceManager(this);
             Core.GraphicsDeviceManager = _graphics;
-            IsFixedTimeStep = false;
+
+            _stopwatch.Start();
         }
 
         protected override void LoadContent()
@@ -51,12 +57,17 @@ namespace MemoryLeak
 
         protected override void Update(GameTime gameTime)
         {
+            _stopwatch.Start();
+            var frametime = _stopwatch.Elapsed - _previous;
+
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
                 Exit();
 
-            CurrentState.Update(1);
-
+            CurrentState.Update((float) (frametime.TotalMilliseconds*10));
             base.Update(gameTime);
+
+            _previous = _stopwatch.Elapsed;
+            _stopwatch.Reset();
         }
 
         protected override void Draw(GameTime gameTime)
@@ -83,7 +94,7 @@ namespace MemoryLeak
 
             var player = new Entity(Resource<Texture2D>.Get("debug-entity"), RandomWrapper.Range(10), RandomWrapper.Range(10), 0);
 
-            player.Tick += sender =>
+            player.Tick += dt =>
                                {
                                    var k = Keyboard.GetState();
                                    var isRunning = k.IsKeyDown(Keys.LeftShift);
@@ -109,7 +120,7 @@ namespace MemoryLeak
                                        }
                                    }
 
-                                   player.Move((int) move.X, (int) move.Y, (isRunning ? 3 : 1));
+                                   player.Move((int) move.X, (int) move.Y, (isRunning ? 3 : 1) * dt);
                                    camera.Position = player.Position;
                                };
 
