@@ -86,23 +86,7 @@ namespace MemoryLeak.Core
                         }
 
                         foreach (var i in duplicate.Where(i => i != this && i.Rectangle.Intersects(Rectangle) && !i.IsPassable))
-                        {
-                            var overEnt = Rectangle.Intersect(Rectangle, i.Rectangle);
-                            var entityDirection = (overEnt.Width < overEnt.Height);
-
-                            Entity pusher = this, pushee = i;
-
-                            if (entityDirection)
-                            {
-                                if (pusher.CenterPosition.X < pushee.CenterPosition.X) pushee.Move(1, 0, overEnt.Width);
-                                else pushee.Move(-1, 0, overEnt.Width);
-                            }
-                            else
-                            {
-                                if (pusher.Position.Y < pushee.CenterPosition.Y) pushee.Move(0, 1, overEnt.Height);
-                                else pushee.Move(0, -1, overEnt.Height);
-                            }
-                        }
+                            Offset(i.Rectangle);
                     }
 
                     // Tile & Faux-Tile Pass
@@ -118,9 +102,7 @@ namespace MemoryLeak.Core
                     if (!rectangle.Intersects(Rectangle)) continue;
 
                     if (tile == null || !tile.IsPassable)
-                    {
                         Offset(rectangle);
-                    }
                 }
         }
 
