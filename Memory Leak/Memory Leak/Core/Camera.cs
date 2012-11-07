@@ -47,7 +47,7 @@ namespace MemoryLeak.Core
 			{
 				if (_isDirty)
 				{
-                    _matrix = Matrix.CreateTranslation(new Vector3(-(float)Math.Round(_position.X), -(float)Math.Round(_position.Y), 0)) *
+                    _matrix = Matrix.CreateTranslation(new Vector3(-_position.X, -_position.Y, 0)) *
 							  Matrix.CreateRotationZ(_rotation) * Matrix.CreateScale(new Vector3(_zoom, _zoom, 1)) *
 							  Matrix.CreateTranslation(new Vector3(Game.Core.Resolution.X * 0.5f, Game.Core.Resolution.Y * 0.5f, 0));
 				}
