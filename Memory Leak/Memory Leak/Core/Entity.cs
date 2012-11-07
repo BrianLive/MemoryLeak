@@ -34,7 +34,8 @@ namespace MemoryLeak.Core
             }
         }
 
-        public event Action<Drawable> Death, Tick, Collision;
+        public event Action<Drawable> Death, Collision;
+        public event Action<float> Tick;
 
         private Rectangle _previousCollisionRect;
 
@@ -210,9 +211,9 @@ namespace MemoryLeak.Core
             ParentTile = Parent.Get((int)(CenterPosition.X / Width), (int)(CenterPosition.Y / Height), Depth);
         }
 
-        public void Update(GameTime gameTime)
+        public void Update(float delta)
         {
-            if (Tick != null) Tick(this);
+            if (Tick != null) Tick(delta);
         }
 
         private void OnCollision(Drawable sender)

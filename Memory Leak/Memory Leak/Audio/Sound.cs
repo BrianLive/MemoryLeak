@@ -1,30 +1,25 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
+﻿using System.IO;
 using NAudio.Wave;
 
 namespace MemoryLeak.Audio
 {
     internal class Sound
     {
-        private WaveOutEvent waveOut = new WaveOutEvent();
-        private LoopStream loop;
+        private readonly WaveOutEvent _waveOut = new WaveOutEvent();
+        private readonly LoopStream _loop;
 
         public bool IsLooped
         {
-            set { loop.EnableLooping = value; }
-            get { return loop.EnableLooping; }
+            set { _loop.EnableLooping = value; }
+            get { return _loop.EnableLooping; }
         }
 
         private Sound(Stream stream)
         {
             WaveStream waveStream = new WaveFileReader(stream);
-            WaveChannel32 waveChannel = new WaveChannel32(waveStream);
 
-            loop = new LoopStream(waveStream);
-            waveOut.Init(loop);
+            _loop = new LoopStream(waveStream);
+            _waveOut.Init(_loop);
 
             IsLooped = false;
         }
@@ -34,12 +29,12 @@ namespace MemoryLeak.Audio
             /*_waveOutDevice.Init(_inputStream);
             _waveOutDevice.Play();*/
 
-            waveOut.Play();
+            _waveOut.Play();
         }
 
         public void Stop()
         {
-            waveOut.Stop();
+            _waveOut.Stop();
         }
 
         public static Sound FromStream(Stream stream)
@@ -55,7 +50,7 @@ namespace MemoryLeak.Audio
     /// </summary>
     public class LoopStream : WaveStream
     {
-        private WaveStream sourceStream;
+        private readonly WaveStream _sourceStream;
 
         /// <summary>
         /// Creates a new Loop stream
@@ -64,8 +59,8 @@ namespace MemoryLeak.Audio
         /// or else we will not loop to the start again.</param>
         public LoopStream(WaveStream sourceStream)
         {
-            this.sourceStream = sourceStream;
-            this.EnableLooping = true;
+            _sourceStream = sourceStream;
+            EnableLooping = true;
         }
 
         /// <summary>
@@ -78,7 +73,7 @@ namespace MemoryLeak.Audio
         /// </summary>
         public override WaveFormat WaveFormat
         {
-            get { return sourceStream.WaveFormat; }
+            get { return _sourceStream.WaveFormat; }
         }
 
         /// <summary>
@@ -86,7 +81,7 @@ namespace MemoryLeak.Audio
         /// </summary>
         public override long Length
         {
-            get { return sourceStream.Length; }
+            get { return _sourceStream.Length; }
         }
 
         /// <summary>
@@ -94,8 +89,8 @@ namespace MemoryLeak.Audio
         /// </summary>
         public override long Position
         {
-            get { return sourceStream.Position; }
-            set { sourceStream.Position = value; }
+            get { return _sourceStream.Position; }
+            set { _sourceStream.Position = value; }
         }
 
         public override int Read(byte[] buffer, int offset, int count)
@@ -104,16 +99,16 @@ namespace MemoryLeak.Audio
 
             while (totalBytesRead < count)
             {
-                int bytesRead = sourceStream.Read(buffer, offset + totalBytesRead, count - totalBytesRead);
+                int bytesRead = _sourceStream.Read(buffer, offset + totalBytesRead, count - totalBytesRead);
                 if (bytesRead == 0)
                 {
-                    if (sourceStream.Position == 0 || !EnableLooping)
+                    if (_sourceStream.Position == 0 || !EnableLooping)
                     {
                         // something wrong with the source stream
                         break;
                     }
                     // loop
-                    sourceStream.Position = 0;
+                    _sourceStream.Position = 0;
                 }
                 totalBytesRead += bytesRead;
             }

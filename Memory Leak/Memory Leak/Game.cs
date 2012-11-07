@@ -35,6 +35,7 @@ namespace MemoryLeak
             // DON'T DO INITIALIZATION STUFF HERE, DO IT IN LOAD CONTENT gosh - Brian
             _graphics = new GraphicsDeviceManager(this);
             Core.GraphicsDeviceManager = _graphics;
+            IsFixedTimeStep = false;
         }
 
         protected override void LoadContent()
@@ -53,7 +54,7 @@ namespace MemoryLeak
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
                 Exit();
 
-            CurrentState.Update(gameTime);
+            CurrentState.Update(1);
 
             base.Update(gameTime);
         }
@@ -108,11 +109,9 @@ namespace MemoryLeak
                                        }
                                    }
 
-                                   player.Move((int) move.X, (int) move.Y, isRunning ? 3 : 1);
-                                   if (move != Vector2.Zero) camera.Position = player.Position;
+                                   player.Move((int) move.X, (int) move.Y, (isRunning ? 3 : 1));
+                                   camera.Position = player.Position;
                                };
-
-            camera.Position = player.Position;
 
             chunk.Add(player);
 

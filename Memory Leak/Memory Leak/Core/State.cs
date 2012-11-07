@@ -1,5 +1,4 @@
-﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework.Graphics;
 
 namespace MemoryLeak.Core
 {
@@ -22,9 +21,9 @@ namespace MemoryLeak.Core
             spriteBatch.End();
         }
 
-        public void Update(GameTime gameTime)
+        public void Update(float delta)
         {
-            Chunk.Update(gameTime);
+            Chunk.Update(delta);
         }
     }
 }

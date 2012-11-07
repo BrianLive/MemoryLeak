@@ -102,10 +102,10 @@ namespace MemoryLeak.Core
                 i.Draw(spriteBatch);
         }
 
-        public void Update(GameTime gameTime)
+        public void Update(float delta)
         {
             foreach (var i in _entities)
-                i.Update(gameTime);
+                i.Update(delta);
         }
     }
 }
