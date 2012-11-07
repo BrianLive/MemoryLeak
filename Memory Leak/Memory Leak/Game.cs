@@ -62,8 +62,29 @@ namespace MemoryLeak
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
                 Exit();
 
-            CurrentState.Update((float)(gameTime.ElapsedGameTime.TotalSeconds));
-            base.Update(gameTime);
+            float maxDT = 1 / 60.0f; //Our max deltatime
+            int maxSteps = 10; //Limit the amount of times we update the game per frame
+            int stepCounter = 0;
+
+            float frameTime = (float)(gameTime.ElapsedGameTime.TotalSeconds);
+
+            while (frameTime > 0) //Clever timestep shit stolen from http://gafferongames.com/game-physics/fix-your-timestep/ (and also from Froid and Space Hazard)
+            {
+                if (stepCounter >= maxSteps)
+                {
+                    Console.WriteLine("Too much lag! Slowing simulation down...");
+                    break; //Avoid spiral of death by slowing simulation down
+                }
+
+                float deltaTime = Math.Min(frameTime, maxDT);
+
+                CurrentState.Update(deltaTime);
+                base.Update(gameTime);
+
+                frameTime -= deltaTime;
+                stepCounter++;
+
+            }
 
             //_previous = _stopwatch.ElapsedTicks / (double)Stopwatch.Frequency;
             //_stopwatch.Restart();
