@@ -39,6 +39,7 @@ namespace MemoryLeak.Core
         public event Action<float> Tick;
 
         private RectangleF _previousCollisionRect;
+        private int iterations;
 
         public Entity(Texture2D texture, int x, int y, int z, bool isPassable = false)
             : base(texture)
@@ -109,6 +110,10 @@ namespace MemoryLeak.Core
 
         private void Offset(RectangleF other)
         {
+            iterations++;
+            if (iterations > 1000) //Avoid stack overflow
+                return;
+
             var over = RectangleF.Intersect(Rectangle, other);
 
             if(over.Width < over.Height) OffsetDirection(true, other, over);
@@ -153,6 +158,7 @@ namespace MemoryLeak.Core
 
         public void Update(float delta)
         {
+            iterations = 0; //We allocate 1000 iterations per update, so reset it here
             if (Tick != null) Tick(delta);
         }
 
