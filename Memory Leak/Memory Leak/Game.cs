@@ -130,6 +130,7 @@ namespace MemoryLeak
                 }
 
                 player.Move((int) move.X, (int) move.Y, (isRunning ? 300 : 100) * dt);
+                player.Position = new Vector2((float)Math.Round(player.Position.X), (float)Math.Round(player.Position.Y));
                 camera.Position = player.Position;
             };
 
