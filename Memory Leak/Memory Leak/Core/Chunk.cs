@@ -37,7 +37,6 @@ namespace MemoryLeak.Core
 
         private readonly Tile[,,] _tiles;
         private readonly List<Entity> _entities = new List<Entity>();
-        private readonly List<DebugRectangle> _debuggers = new List<DebugRectangle>();
 
         public int Width { get; private set; }
         public int Height { get; private set; }
@@ -63,7 +62,6 @@ namespace MemoryLeak.Core
             _entities.Add(entity);
             entity.Parent = this;
             entity.CorrectParent();
-            _debuggers.Add(entity.One);
         }
 
         public void Remove(Entity entity)
@@ -101,9 +99,6 @@ namespace MemoryLeak.Core
                                 _tiles[x, y, z].Draw(spriteBatch);
 
             foreach (var i in _entities)
-                i.Draw(spriteBatch);
-
-            foreach (var i in _debuggers)
                 i.Draw(spriteBatch);
         }
 

@@ -14,9 +14,6 @@ namespace MemoryLeak.Core
         public bool IsPassable { get; set; }
         public bool IsWalkable { get; set; }
 
-        public readonly DebugRectangle One = new DebugRectangle();
-        private DebugRectangle two = new DebugRectangle(), three = new DebugRectangle();
-
         public Chunk.Tile ParentTile
         {
             get { return _parentTile; }
@@ -39,7 +36,7 @@ namespace MemoryLeak.Core
 
         public event Action<Drawable> Death, Tick, Collision;
 
-        private Rectangle _previousCollisionRect = new Rectangle();
+        private Rectangle _previousCollisionRect;
 
         public Entity(Texture2D texture, int x, int y, int z, bool isPassable = false)
             : base(texture)
@@ -96,11 +93,6 @@ namespace MemoryLeak.Core
         private void Offset(Rectangle other)
         {
             var over = Rectangle.Intersect(Rectangle, other);
-
-            One.Position = new Vector2(over.X, over.Y);
-
-            One.Width = over.Width;
-            One.Height = over.Height;
 
             if(over.Width < over.Height) OffsetDirection(true, other, over);
             else if(over.Width > over.Height) OffsetDirection(false, other, over);
