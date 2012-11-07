@@ -59,7 +59,7 @@ namespace MemoryLeak.Core
 			{
 				if (ActualPosition != _position)
 				{
-					const float acceleration = 0.25f;
+					float acceleration = (Math.Abs(ActualPosition.X - _position.X) + Math.Abs(ActualPosition.Y - _position.Y))/2;
 
 					_velocity += LengthDir(Direction(ActualPosition, _position), acceleration);
 
