@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing;
 using System.Linq;
 using MemoryLeak.Graphics;
 using Microsoft.Xna.Framework;
@@ -37,7 +38,7 @@ namespace MemoryLeak.Core
         public event Action<Drawable> Death, Collision;
         public event Action<float> Tick;
 
-        private Rectangle _previousCollisionRect;
+        private RectangleF _previousCollisionRect;
 
         public Entity(Texture2D texture, int x, int y, int z, bool isPassable = false)
             : base(texture)
@@ -79,40 +80,40 @@ namespace MemoryLeak.Core
                         var duplicate = new Entity[tile.Children.Count];
                         tile.Children.CopyTo(duplicate);
 
-                        foreach (var i in duplicate.Where(i => i != this && i.Rectangle.Intersects(Rectangle)))
+                        foreach (var i in duplicate.Where(i => i != this && i.Rectangle.IntersectsWith(Rectangle)))
                         {
                             i.OnCollision(this);
                             OnCollision(i);
                         }
 
-                        foreach (var i in duplicate.Where(i => i != this && i.Rectangle.Intersects(Rectangle) && !i.IsPassable))
+                        foreach (var i in duplicate.Where(i => i != this && i.Rectangle.IntersectsWith(Rectangle) && !i.IsPassable))
                             Offset(i.Rectangle);
                     }
 
                     // Tile & Faux-Tile Pass
-                    Rectangle rectangle;
+                    RectangleF rectangle;
 
                     if (tile == null)
-                        rectangle = new Rectangle((int)((Math.Round(CenterPosition.X / Width) + x) * Width),
-                                                  (int)((Math.Round(CenterPosition.Y / Height) + y) * Height),
-                                                  (int)Width,
-                                                  (int)Height);
+                        rectangle = new RectangleF((float) ((Math.Round(CenterPosition.X/Width) + x)*Width),
+                                                   (float) ((Math.Round(CenterPosition.Y/Height) + y)*Height),
+                                                   Width,
+                                                   Height);
                     else rectangle = tile.Rectangle;
 
-                    if (!rectangle.Intersects(Rectangle)) continue;
+                    if (!rectangle.IntersectsWith(Rectangle)) continue;
 
                     if (tile == null || !tile.IsPassable)
                         Offset(rectangle);
                 }
         }
 
-        private void Offset(Rectangle other)
+        private void Offset(RectangleF other)
         {
-            var over = Rectangle.Intersect(Rectangle, other);
+            var over = RectangleF.Intersect(Rectangle, other);
 
             if(over.Width < over.Height) OffsetDirection(true, other, over);
             else if(over.Width > over.Height) OffsetDirection(false, other, over);
-            else if(over.Width == over.Height) 
+            else if(Math.Abs(over.Width - over.Height) < float.Epsilon) 
                 if(!_previousCollisionRect.IsEmpty)
                     if(_previousCollisionRect.Width < _previousCollisionRect.Height)
                         OffsetDirection(true, other, over);
@@ -122,7 +123,7 @@ namespace MemoryLeak.Core
             _previousCollisionRect = over;
         }
 
-        private void OffsetDirection(bool isHorizontal, Rectangle other, Rectangle over)
+        private void OffsetDirection(bool isHorizontal, RectangleF other, RectangleF over)
         {
             if (isHorizontal)
             {
@@ -131,7 +132,7 @@ namespace MemoryLeak.Core
                 if (isNegative) Move(-1, 0, over.Width);
                 else Move(1, 0, over.Width);
 
-                if (Rectangle.Intersects(other)) Offset(other);
+                if (Rectangle.IntersectsWith(other)) Offset(other);
             }
             else
             {
@@ -140,7 +141,7 @@ namespace MemoryLeak.Core
                 if (isNegative) Move(0, -1, over.Height);
                 else Move(0, 1, over.Height);
 
-                if (Rectangle.Intersects(other)) Offset(other);
+                if (Rectangle.IntersectsWith(other)) Offset(other);
             }
         }
 
