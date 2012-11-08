@@ -83,11 +83,11 @@ namespace MemoryLeak.Core
 
         public Tile Get(int x, int y, int z)
         {
-            if (x > Width - 1 || y > Height - 1 || x < 0 || y < 0) return null;
+            if (x > Width - 1 || y > Height - 1 || z > Depth - 1 || x < 0 || y < 0 || z < 0) return null;
             return _tiles[x, y, z];
         }
 
-        public bool PlaceFree(RectangleF rect)
+        public bool PlaceFree(RectangleF rect, int z)
         {
             int xMax = (int) (Math.Round(rect.Right)/Tile.Width) + 1;
             int yMax = (int) (Math.Round(rect.Bottom)/Tile.Height) + 1;
@@ -97,7 +97,7 @@ namespace MemoryLeak.Core
                 for (var y = (int)(Math.Round(rect.Y) / Tile.Height) - 1; y < yMax; y++)
                 {
                     var tile = Parent != null
-                                   ? Get(x, y, Depth)
+                                   ? Get(x, y, z)
                                    : null;
 
                     RectangleF rectangle = tile == null ? new RectangleF(x * Tile.Width, y * Tile.Height, Width, Height) : tile.Rectangle;
