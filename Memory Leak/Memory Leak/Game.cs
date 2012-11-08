@@ -99,9 +99,9 @@ namespace MemoryLeak
 
             for (var x = 0; x < chunk.Width; x++)
                 for (var y = 0; y < chunk.Height; y++ )
-                    if (RandomWrapper.Range() > 0.0) chunk.Set(x, y, 0, new Chunk.Tile(Resource<Texture2D>.Get("debug")) {IsPassable = true});
+                    chunk.Set(x, y, 0, new Chunk.Tile(Resource<Texture2D>.Get("debug")) {IsPassable = true});
 
-            var player = new Entity(Resource<Texture2D>.Get("debug-entity"), RandomWrapper.Range(10), RandomWrapper.Range(10), 0);
+            var player = new Entity(Resource<Texture2D>.Get("debug-entity"), 2, 2, 0);
 
             player.Tick += dt =>
             {
@@ -129,8 +129,12 @@ namespace MemoryLeak
                     }
                 }
 
-                player.Position += new Vector2((200 * move.X) * dt, (200 * move.Y) * dt);
-                player.Position = new Vector2((float)Math.Round(player.Position.X), (float)Math.Round(player.Position.Y));
+                if(move != Vector2.Zero)
+                {
+                    player.Position += new Vector2((100 * move.X) * dt, (100 * move.Y) * dt);
+                    player.Position = new Vector2((float)Math.Round(player.Position.X), (float)Math.Round(player.Position.Y));
+                }
+
                 camera.Position = player.Position;
             };
 

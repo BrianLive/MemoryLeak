@@ -73,10 +73,13 @@ namespace MemoryLeak.Core
 
         public void Correct()
         {
-            Vector2 correction = new Vector2();
+            Vector2 correction = Vector2.Zero;
 
-            for (var x = (int)Math.Round(Rectangle.X / Chunk.Tile.Width) - 1; x <= Math.Round(Rectangle.Right / Chunk.Tile.Width) + 1; x++)
-                for (var y = (int)Math.Round(Rectangle.Y / Chunk.Tile.Height) - 1; y <= Math.Round(Rectangle.Bottom / Chunk.Tile.Height) + 1; y++)
+            var xMax = (int)(Math.Round(Rectangle.Right) / Chunk.Tile.Width) + 1;
+            var yMax = (int)(Math.Round(Rectangle.Bottom) / Chunk.Tile.Height) + 1;
+
+            for (var x = (int)(Math.Round(Rectangle.X) / Chunk.Tile.Width) - 1; x < xMax; x++)
+                for (var y = (int)(Math.Round(Rectangle.Y) / Chunk.Tile.Height) - 1; y < yMax; y++)
                 {
                     var tile = Parent != null
                                    ? Parent.Get(x, y, Depth)
@@ -98,24 +101,17 @@ namespace MemoryLeak.Core
                     }*/
 
                     // Tile & Faux-Tile Pass
-                    RectangleF rectangle;
 
-                    if (tile == null)
-                        rectangle = new RectangleF((float) ((Math.Round(CenterPosition.X/Width) + x)*Width),
-                                                   (float) ((Math.Round(CenterPosition.Y/Height) + y)*Height),
-                                                   Width,
-                                                   Height);
-                    else rectangle = tile.Rectangle;
+                    RectangleF rectangle = tile == null ? new RectangleF(x*Chunk.Tile.Width, y*Chunk.Tile.Height, Width, Height) : tile.Rectangle;
+                    
+                    if (!Rectangle.IntersectsWith(rectangle)) continue;
 
-                    if (rectangle.IntersectsWith(Rectangle))
-                    {
-                        if(tile != null && tile.IsPassable) continue;
+                    if (tile != null && tile.IsPassable) continue;
 
-                        var offset = Offset(Rectangle, rectangle);
+                    var offset = Offset(Rectangle, rectangle);
 
-                        if (Math.Abs(offset.X) > Math.Abs(correction.X)) correction.X = offset.X;
-                        if (Math.Abs(offset.Y) > Math.Abs(correction.Y)) correction.Y = offset.Y;
-                    }
+                    if (Math.Abs(offset.X) > Math.Abs(correction.X)) correction.X = offset.X;
+                    if (Math.Abs(offset.Y) > Math.Abs(correction.Y)) correction.Y = offset.Y;
                 }
 
             if(correction != Vector2.Zero) Position += correction;
