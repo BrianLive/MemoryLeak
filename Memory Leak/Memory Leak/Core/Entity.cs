@@ -17,20 +17,8 @@ namespace MemoryLeak.Core
 
         public new Vector2 Position
         {
-            get { return base.Position; }
-            set
-            {
-                base.Position += value;
-
-                if(Parent != null)
-                {
-                    CorrectParent();
-                    Correct();
-                }
-                
-
-                if (ParentTile != null) ParentTile.OnStep(this);
-            }
+            get { return new Vector2((float)Math.Round(base.Position.X), (float)Math.Round(base.Position.Y)); }
+            set { base.Position = value; }
         }
 
         public Chunk.Tile ParentTile
@@ -71,14 +59,30 @@ namespace MemoryLeak.Core
             Parent.Remove(this);
         }
 
+        public void Move(int x, int y, float rate)
+        {
+            rate = Math.Abs(rate);
+            Position += new Vector2(x * rate, y * rate);
+
+            if (Parent != null)
+            {
+                CorrectParent();
+                Correct();
+            }
+
+
+            if (ParentTile != null) ParentTile.OnStep(this);
+        }
+
         public void Correct()
         {
             Vector2 correction = Vector2.Zero;
 
-            var xMax = (int)(Math.Round(Rectangle.Right) / Chunk.Tile.Width) + 1;
-            var yMax = (int)(Math.Round(Rectangle.Bottom) / Chunk.Tile.Height) + 1;
+            int xMax = (int)(Math.Round(Rectangle.Right) / Chunk.Tile.Width) + 1;
+            int yMax = (int)(Math.Round(Rectangle.Bottom) / Chunk.Tile.Height) + 1;
 
             for (var x = (int)(Math.Round(Rectangle.X) / Chunk.Tile.Width) - 1; x < xMax; x++)
+            {
                 for (var y = (int)(Math.Round(Rectangle.Y) / Chunk.Tile.Height) - 1; y < yMax; y++)
                 {
                     var tile = Parent != null
@@ -102,10 +106,9 @@ namespace MemoryLeak.Core
 
                     // Tile & Faux-Tile Pass
 
-                    RectangleF rectangle = tile == null ? new RectangleF(x*Chunk.Tile.Width, y*Chunk.Tile.Height, Width, Height) : tile.Rectangle;
-                    
-                    if (!Rectangle.IntersectsWith(rectangle)) continue;
+                    RectangleF rectangle = tile == null ? new RectangleF(x * Chunk.Tile.Width, y * Chunk.Tile.Height, Width, Height) : tile.Rectangle;
 
+                    if (!Rectangle.IntersectsWith(rectangle) || Rectangle == rectangle) continue;
                     if (tile != null && tile.IsPassable) continue;
 
                     var offset = Offset(Rectangle, rectangle);
@@ -113,6 +116,7 @@ namespace MemoryLeak.Core
                     if (Math.Abs(offset.X) > Math.Abs(correction.X)) correction.X = offset.X;
                     if (Math.Abs(offset.Y) > Math.Abs(correction.Y)) correction.Y = offset.Y;
                 }
+            }
 
             if(correction != Vector2.Zero) Position += correction;
         }
