@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using MemoryLeak.Entities;
 using MemoryLeak.Graphics;
 using Microsoft.Xna.Framework;
@@ -111,30 +112,24 @@ namespace MemoryLeak.Core
 
                     if (tile != null)
                     {
-                        var lower = Get(x, y, z - 1);
-
                         foreach (var i in tile.Children)
                         {
-                            if (i is Physical)
-                            {
-                                var ii = (Physical) i;
-                                if (ii == sender) continue;
-                                if (!ii.IsPassable && rect.IntersectsWith(ii.Rectangle))
-                                    return false;
-                            }
-
+                            var ii = i as Physical;
+                            if (ii == null) continue;
+                            if (ii == sender) continue;
+                            if (ii.IsPassable || !rect.IntersectsWith(ii.Rectangle)) continue;
+                            sender.OnCollision(ii);
+                            ii.OnCollision(sender);
+                            return false;
                         }
+                    }
+                    else
+                    {
+                        var lower = Get(x, y, z - 1);
 
-                        if(lower != null)
-                        {
-                            foreach(var i in lower.Children)
-                            {
-                                if(i is Physical)
-                                {
-                                    var ii = (Physical) i;
-                                }
-                            }
-                        }
+                        if (lower == null) continue;
+                        if (lower.Children.OfType<Physical>().Any(ii => !ii.IsWalkable))
+                            return false;
                     }
                 }
             }
