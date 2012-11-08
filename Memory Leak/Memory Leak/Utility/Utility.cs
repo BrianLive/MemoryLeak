@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Microsoft.Xna.Framework;
 
 namespace MemoryLeak.Utility
@@ -23,5 +22,12 @@ namespace MemoryLeak.Utility
 		{
 			return new Vector2((float)Math.Cos(dir) * len, (float)-Math.Sin(dir) * len);
 		}
+
+        public static float GetSmallest(List<float> values)
+        {
+            float[] smallest = {float.MaxValue};
+            foreach (var i in values.Where(i => Math.Abs(i) < Math.Abs(smallest[0]))) smallest[0] = i;
+            return smallest[0];
+        }
     }
 }

@@ -1,6 +1,6 @@
 using System;
-using System.Diagnostics;
 using MemoryLeak.Core;
+using MemoryLeak.Entities;
 using MemoryLeak.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -99,14 +99,13 @@ namespace MemoryLeak
 
             for (var x = 0; x < chunk.Width; x++)
                 for (var y = 0; y < chunk.Height; y++ )
-                    if(RandomWrapper.Range(1f) > 0.2) chunk.Set(x, y, 0, new Chunk.Tile(Resource<Texture2D>.Get("debug")) {IsPassable = true});
+                    if(RandomHelper.Range(1f) > 0.2) chunk.Set(x, y, 0, new Chunk.Tile(Resource<Texture2D>.Get("debug")) {IsPassable = true});
 
-            var player = new Entity(Resource<Texture2D>.Get("debug-entity"), 2, 2, 0);
+            var player = new Physical(Resource<Texture2D>.Get("debug-entity"), 2, 2, 0);
 
             player.Tick += dt =>
             {
                 var k = Keyboard.GetState();
-                var isRunning = k.IsKeyDown(Keys.LeftShift);
 
                 var move = Vector2.Zero;
 

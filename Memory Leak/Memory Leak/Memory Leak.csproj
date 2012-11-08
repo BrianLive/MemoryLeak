@@ -85,6 +85,7 @@
     <Compile Include="Audio\Sound.cs" />
     <Compile Include="Core\Camera.cs" />
     <Compile Include="Core\Chunk.cs" />
+    <Compile Include="Entities\Physical.cs" />
     <Compile Include="Graphics\Drawable.cs" />
     <Compile Include="Core\Entity.cs" />
     <Compile Include="Core\State.cs" />
@@ -92,8 +93,8 @@
     <Compile Include="Program.cs" />
     <Compile Include="Game.cs" />
     <Compile Include="Resource.cs" />
-    <Compile Include="Utility\CollisionHelper.cs" />
-    <Compile Include="Utility\RandomWrapper.cs" />
+    <Compile Include="Utility\RandomHelper.cs" />
+    <Compile Include="Utility\Utility.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Memory LeakContent\Memory LeakContent.contentproj">

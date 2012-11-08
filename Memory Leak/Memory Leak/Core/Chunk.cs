@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using MemoryLeak.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -84,6 +85,28 @@ namespace MemoryLeak.Core
         {
             if (x > Width - 1 || y > Height - 1 || x < 0 || y < 0) return null;
             return _tiles[x, y, z];
+        }
+
+        public bool PlaceFree(RectangleF rect)
+        {
+            int xMax = (int) (Math.Round(rect.Right)/Tile.Width) + 1;
+            int yMax = (int) (Math.Round(rect.Bottom)/Tile.Height) + 1;
+
+            for (var x = (int)(Math.Round(rect.X) / Tile.Width) - 1; x < xMax; x++)
+            {
+                for (var y = (int)(Math.Round(rect.Y) / Tile.Height) - 1; y < yMax; y++)
+                {
+                    var tile = Parent != null
+                                   ? Get(x, y, Depth)
+                                   : null;
+
+                    RectangleF rectangle = tile == null ? new RectangleF(x * Tile.Width, y * Tile.Height, Width, Height) : tile.Rectangle;
+
+                    if (rect.IntersectsWith(rectangle) && (tile != null && !tile.IsPassable)) return false;
+                }
+            }
+
+            return true;
         }
 
         public void Draw(SpriteBatch spriteBatch)

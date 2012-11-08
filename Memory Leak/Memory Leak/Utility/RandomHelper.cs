@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework;
 
 namespace MemoryLeak.Utility
 {
-    class RandomWrapper
+    class RandomHelper
     {
         private static readonly Random Random = new Random();
 
