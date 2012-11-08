@@ -115,7 +115,7 @@ namespace MemoryLeak.Core
 
                         foreach (var i in tile.Children)
                         {
-                            if (i as Physical != null)
+                            if (i is Physical)
                             {
                                 var ii = (Physical) i;
                                 if (ii == sender) continue;
@@ -123,6 +123,17 @@ namespace MemoryLeak.Core
                                     return false;
                             }
 
+                        }
+
+                        if(lower != null)
+                        {
+                            foreach(var i in lower.Children)
+                            {
+                                if(i is Physical)
+                                {
+                                    var ii = (Physical) i;
+                                }
+                            }
                         }
                     }
                 }
