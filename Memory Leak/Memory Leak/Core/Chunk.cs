@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using MemoryLeak.Entities;
 using MemoryLeak.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -62,7 +63,9 @@ namespace MemoryLeak.Core
         {
             entity.Parent = this;
             _entities.Add(entity);
-            entity.CorrectParent();
+
+            if(entity as Physical != null)
+                ((Physical)entity).CorrectParent();
         }
 
         public void Remove(Entity entity)
@@ -87,21 +90,42 @@ namespace MemoryLeak.Core
             return _tiles[x, y, z];
         }
 
-        public bool PlaceFree(RectangleF rect, int z)
+        public bool PlaceFree(Physical sender, int z)
         {
+            var rect = sender.Rectangle;
+
             int xMax = (int) (Math.Round(rect.Right)/Tile.Width) + 1;
             int yMax = (int) (Math.Round(rect.Bottom)/Tile.Height) + 1;
 
             for (var x = (int)(Math.Round(rect.X) / Tile.Width) - 1; x < xMax; x++)
             {
-                for (var y = (int)(Math.Round(rect.Y) / Tile.Height) - 1; y < yMax; y++)
+                for (var y = (int) (Math.Round(rect.Y)/Tile.Height) - 1; y < yMax; y++)
                 {
                     var tile = Get(x, y, z);
 
-                    RectangleF rectangle = tile == null ? new RectangleF(x * Tile.Width, y * Tile.Height, Tile.Width, Tile.Height) : tile.Rectangle;
+                    RectangleF rectangle = tile == null
+                                               ? new RectangleF(x*Tile.Width, y*Tile.Height, Tile.Width, Tile.Height)
+                                               : tile.Rectangle;
 
                     if (rect.IntersectsWith(rectangle) && ((tile != null && !tile.IsPassable) || tile == null))
                         return false;
+
+                    if (tile != null)
+                    {
+                        var lower = Get(x, y, z - 1);
+
+                        foreach(var i in tile.Children)
+                        {
+                            if(i as Physical != null)
+                            {
+                                var ii = (Physical)i;
+                                if (ii == sender) continue;
+                                if (!ii.IsPassable && rect.IntersectsWith(ii.Rectangle))
+                                    return false;
+                            }
+                            
+                        }
+                    }
                 }
             }
 

@@ -1,19 +1,39 @@
 ﻿using System;
 using MemoryLeak.Core;
-using MemoryLeak.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace MemoryLeak.Entities
 {
-    class Physical : Entity
+    public class Physical : Entity
     {
         public bool IsPassable { get; set; }
         public bool IsWalkable { get; set; }
 
-        public event Action<Drawable> Collision;
+        public event Action<Physical> Collision;
 
+        private Chunk.Tile _parentTile;
         private float _hSave, _vSave;
+
+        public Chunk.Tile ParentTile
+        {
+            get { return _parentTile; }
+            set
+            {
+                Chunk.Tile old = null;
+                if (ParentTile != null) old = ParentTile;
+                _parentTile = value;
+
+                if (old == null || (old == _parentTile))
+                {
+                    if (_parentTile != null && !_parentTile.Children.Contains(this)) _parentTile.Children.Add(this);
+                    return;
+                }
+
+                if (old.Children.Contains(this)) old.Children.Remove(this);
+                if (_parentTile != null && !_parentTile.Children.Contains(this)) ParentTile.Children.Add(this);
+            }
+        }
 
         public Physical(Texture2D texture, int x, int y, int z, bool isPassable = false) : base(texture, x, y, z)
         {
@@ -51,13 +71,14 @@ namespace MemoryLeak.Entities
             {
                 testRect.X += Math.Sign(hMove);
 
-                if(!Parent.PlaceFree(testRect, Depth))
+                if(!Parent.PlaceFree(this, Depth))
                 {
                     _hSave = 0;
                     break;
                 }
 
                 Position += new Vector2(Math.Sign(hMove), 0);
+                CorrectParent();
             }
 
             testRect = Rectangle;
@@ -66,20 +87,26 @@ namespace MemoryLeak.Entities
             {
                 testRect.Y += Math.Sign(vMove);
 
-                if(!Parent.PlaceFree(testRect, Depth))
+                if(!Parent.PlaceFree(this, Depth))
                 {
                     _vSave = 0;
                     break;
                 }
 
                 Position += new Vector2(0, Math.Sign(vMove));
+                CorrectParent();
             }
 
-            CorrectParent();
             if (ParentTile != null) ParentTile.OnStep(this);
         }
 
-        private void OnCollision(Drawable sender)
+        public void CorrectParent()
+        {
+            if (Parent == null) return;
+            ParentTile = Parent.Get((int)(CenterPosition.X / Width), (int)(CenterPosition.Y / Height), Depth);
+        }
+
+        public void OnCollision(Physical sender)
         {
             if (Collision != null) Collision(sender);
         }
