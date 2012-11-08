@@ -11,7 +11,7 @@ namespace MemoryLeak.Core
 
         public event Action<Drawable> Death;
         public event Action<float> Tick;
-
+        
         public Entity(Texture2D texture, int x, int y, int z)
             : base(texture)
         {
