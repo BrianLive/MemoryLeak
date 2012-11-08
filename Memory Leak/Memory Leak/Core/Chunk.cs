@@ -96,9 +96,7 @@ namespace MemoryLeak.Core
             {
                 for (var y = (int)(Math.Round(rect.Y) / Tile.Height) - 1; y < yMax; y++)
                 {
-                    var tile = Parent != null
-                                   ? Get(x, y, z)
-                                   : null;
+                    var tile = Get(x, y, z);
 
                     RectangleF rectangle = tile == null ? new RectangleF(x * Tile.Width, y * Tile.Height, Width, Height) : tile.Rectangle;
 
