@@ -100,7 +100,7 @@ namespace MemoryLeak.Core
 
                     RectangleF rectangle = tile == null ? new RectangleF(x * Tile.Width, y * Tile.Height, Tile.Width, Tile.Height) : tile.Rectangle;
 
-                    if (rect.IntersectsWith(rectangle) && (tile != null && !tile.IsPassable))
+                    if (rect.IntersectsWith(rectangle) && ((tile != null && !tile.IsPassable) || tile == null))
                         return false;
                 }
             }
