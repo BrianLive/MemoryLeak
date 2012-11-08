@@ -90,14 +90,14 @@ namespace MemoryLeak.Core
             return _tiles[x, y, z];
         }
 
-        public bool PlaceFree(Physical sender, int z)
+        public bool PlaceFree(Physical sender, RectangleF rect, int z)
         {
-            int xMax = (int) (Math.Round(sender.Rectangle.Right)/Tile.Width) + 1;
-            int yMax = (int) (Math.Round(sender.Rectangle.Bottom)/Tile.Height) + 1;
+            int xMax = (int) (Math.Round(rect.Right)/Tile.Width) + 1;
+            int yMax = (int) (Math.Round(rect.Bottom)/Tile.Height) + 1;
 
-            for (var x = (int) (Math.Round(sender.Rectangle.X)/Tile.Width) - 1; x < xMax; x++)
+            for (var x = (int) (Math.Round(rect.X)/Tile.Width) - 1; x < xMax; x++)
             {
-                for (var y = (int) (Math.Round(sender.Rectangle.Y)/Tile.Height) - 1; y < yMax; y++)
+                for (var y = (int) (Math.Round(rect.Y)/Tile.Height) - 1; y < yMax; y++)
                 {
                     var tile = Get(x, y, z);
 
@@ -105,7 +105,7 @@ namespace MemoryLeak.Core
                                                ? new RectangleF(x*Tile.Width, y*Tile.Height, Tile.Width, Tile.Height)
                                                : tile.Rectangle;
 
-                    if (sender.Rectangle.IntersectsWith(rectangle) &&
+                    if (rect.IntersectsWith(rectangle) &&
                         ((tile != null && !tile.IsPassable) || tile == null))
                         return false;
 
@@ -119,7 +119,7 @@ namespace MemoryLeak.Core
                             {
                                 var ii = (Physical) i;
                                 if (ii == sender) continue;
-                                if (!ii.IsPassable && sender.Rectangle.IntersectsWith(ii.Rectangle))
+                                if (!ii.IsPassable && rect.IntersectsWith(ii.Rectangle))
                                     return false;
                             }
 

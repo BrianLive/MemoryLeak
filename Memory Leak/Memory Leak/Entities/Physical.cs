@@ -71,7 +71,7 @@ namespace MemoryLeak.Entities
             {
                 testRect.X += Math.Sign(hMove);
 
-                if(!Parent.PlaceFree(this, Depth))
+                if(!Parent.PlaceFree(this, testRect, Depth))
                 {
                     _hSave = 0;
                     break;
@@ -87,7 +87,7 @@ namespace MemoryLeak.Entities
             {
                 testRect.Y += Math.Sign(vMove);
 
-                if(!Parent.PlaceFree(this, Depth))
+                if(!Parent.PlaceFree(this, testRect, Depth))
                 {
                     _vSave = 0;
                     break;
