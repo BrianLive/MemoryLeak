@@ -92,7 +92,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Game.cs" />
     <Compile Include="Resource.cs" />
-    <Compile Include="Utility\Collision.cs" />
+    <Compile Include="Utility\CollisionHelper.cs" />
     <Compile Include="Utility\RandomWrapper.cs" />
   </ItemGroup>
   <ItemGroup>
