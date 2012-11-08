@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using MemoryLeak.Graphics;
+using MemoryLeak.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -10,6 +12,7 @@ namespace MemoryLeak.Core
     public class Entity : Drawable
     {
         private Chunk.Tile _parentTile;
+        private Vector2 _position = Vector2.Zero;
 
         public Chunk Parent { get; set; }
         public bool IsPassable { get; set; }
@@ -18,7 +21,11 @@ namespace MemoryLeak.Core
         public new Vector2 Position
         {
             get { return new Vector2((float)Math.Round(base.Position.X), (float)Math.Round(base.Position.Y)); }
-            set { base.Position = value; }
+            set
+            {
+                base.Position = value;
+                _position = value;
+            }
         }
 
         public Chunk.Tile ParentTile
@@ -76,7 +83,7 @@ namespace MemoryLeak.Core
 
         public void Correct()
         {
-            Vector2 correction = Vector2.Zero;
+            var collisions = new List<RectangleF>();
 
             int xMax = (int)(Math.Round(Rectangle.Right) / Chunk.Tile.Width) + 1;
             int yMax = (int)(Math.Round(Rectangle.Bottom) / Chunk.Tile.Height) + 1;
@@ -110,21 +117,52 @@ namespace MemoryLeak.Core
 
                     if (!Rectangle.IntersectsWith(rectangle)) continue;
                     if (tile != null && tile.IsPassable) continue;
-
-                    var offset = Offset(Rectangle, rectangle);
-
-                    if (Math.Abs(offset.X) > Math.Abs(correction.X)) correction.X = offset.X;
-                    if (Math.Abs(offset.Y) > Math.Abs(correction.Y)) correction.Y = offset.Y;
+                    collisions.Add(rectangle);        
                 }
             }
 
-            if(correction != Vector2.Zero) Position += correction;
-        }
+            var corrections = collisions.Select(i => CollisionHelper.Offset(Rectangle, i)).ToList();
+            var correction = Vector2.Zero;
 
-        private Vector2 Offset(RectangleF sender, RectangleF other)
-        {
-            var over = RectangleF.Intersect(sender, other);
-            return new Vector2(sender.X > other.X ? over.Width : -over.Width, sender.Y > other.Y ? over.Height : -over.Height);
+            foreach(var i in corrections)
+            {
+                correction.X += i.X;
+                correction.Y += i.Y;
+            }
+            
+            int dirX = 0, dirY = 0;
+
+            if (correction.X <= -1) dirX = -1;
+            else if (correction.X >= 1) dirX = 1;
+            else dirX = 0;
+
+            if (correction.Y <= -1) dirY = -1;
+            else if (correction.Y >= 1) dirY = 1;
+            else dirY = 0;
+
+            var smallestX = CollisionHelper.GetSmallestCorrection(true, dirX, corrections);
+            var smallestY = CollisionHelper.GetSmallestCorrection(false, dirY, corrections);
+
+            if(Math.Abs(correction.Y) > Math.Abs(correction.X))
+            {
+                CollisionHelper.CorrectCollision(ref _position, smallestY, false);
+
+                foreach (var i in collisions)
+                    if (Rectangle.IntersectsWith(i))
+                        CollisionHelper.CorrectCollision(ref _position, smallestX, true);
+                    else dirX = 0;
+            }
+            else if (Math.Abs(correction.Y) < Math.Abs(correction.X))
+            {
+                CollisionHelper.CorrectCollision(ref _position, smallestX, true);
+
+                foreach (var i in collisions)
+                    if (Rectangle.IntersectsWith(i))
+                        CollisionHelper.CorrectCollision(ref _position, smallestY, false);
+                    else dirY = 0;
+            }
+
+            Position = _position;
         }
 
         public void CorrectParent()
