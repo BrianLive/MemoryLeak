@@ -57,7 +57,7 @@ namespace MemoryLeak.Entities
                     break;
                 }
 
-                Position += new Vector2(Math.Sign(hMove));
+                Position += new Vector2(Math.Sign(hMove), 0);
             }
 
             testRect = Rectangle;
