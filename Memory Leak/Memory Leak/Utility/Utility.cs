@@ -7,12 +7,7 @@ namespace MemoryLeak.Utility
 {
     public static class Utility
     {
-		public static float Distance(Vector2 p1, Vector2 p2)
-		{
-			return (float)Math.Sqrt(((p2.X - p1.X) * (p2.X - p1.X)) + ((p2.Y - p1.Y) * (p2.Y - p1.Y)));
-		}
-
-		public static float Direction(Vector2 p1, Vector2 p2)
+		public static float Direction(this Vector2 p1, Vector2 p2)
 		{
 			float r = (float)Math.Atan2(p1.Y - p2.Y, p2.X - p1.X);
 			return r < 0 ? r + (2 * (float)Math.PI) : r;
