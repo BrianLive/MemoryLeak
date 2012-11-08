@@ -108,7 +108,7 @@ namespace MemoryLeak.Core
 
                     RectangleF rectangle = tile == null ? new RectangleF(x * Chunk.Tile.Width, y * Chunk.Tile.Height, Width, Height) : tile.Rectangle;
 
-                    if (!Rectangle.IntersectsWith(rectangle) || Rectangle == rectangle) continue;
+                    if (!Rectangle.IntersectsWith(rectangle)) continue;
                     if (tile != null && tile.IsPassable) continue;
 
                     var offset = Offset(Rectangle, rectangle);
@@ -124,7 +124,7 @@ namespace MemoryLeak.Core
         private Vector2 Offset(RectangleF sender, RectangleF other)
         {
             var over = RectangleF.Intersect(sender, other);
-            return new Vector2(sender.X < other.X ? over.Width : -over.Width, sender.Y < other.Y ? over.Height : -over.Height);
+            return new Vector2(sender.X > other.X ? over.Width : -over.Width, sender.Y > other.Y ? over.Height : -over.Height);
         }
 
         public void CorrectParent()
