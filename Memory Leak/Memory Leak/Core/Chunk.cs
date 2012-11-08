@@ -98,7 +98,7 @@ namespace MemoryLeak.Core
                 {
                     var tile = Get(x, y, z);
 
-                    RectangleF rectangle = tile == null ? new RectangleF(x * Tile.Width, y * Tile.Height, Width, Height) : tile.Rectangle;
+                    RectangleF rectangle = tile == null ? new RectangleF(x * Tile.Width, y * Tile.Height, Tile.Width, Tile.Height) : tile.Rectangle;
 
                     if (rect.IntersectsWith(rectangle) && (tile != null && !tile.IsPassable)) return false;
                 }
