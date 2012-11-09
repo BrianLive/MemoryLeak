@@ -141,7 +141,7 @@ namespace MemoryLeak
 
             chunk.Add(player);
 
-            return new State(chunk, camera);
+            return new State(chunk, camera) {Player = player};
         }
     }
 }

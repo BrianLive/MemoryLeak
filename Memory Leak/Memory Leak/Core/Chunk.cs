@@ -44,26 +44,22 @@ namespace MemoryLeak.Core
                     {
                         if(sender.DirX == 1)
                         {
-                            if (sender.Rectangle.Left > Rectangle.Left)
-                            {
-                                sender.Depth += IsRampUpNegative ? -1 : 1;
-                                sender.Depth = (int)MathHelper.Clamp(sender.Depth, 0, Parent.Depth - 1);
-                            }
+                                var depthOffset = (sender.Rectangle.Left > Rectangle.Left) ? 1 : -1;
+                                sender.Depth = (Depth + (IsRampUpNegative ? -1 : 1)) * depthOffset;
                         }
                         else if(sender.DirX == -1)
                         {
-                            if (sender.Rectangle.Right < Rectangle.Right)
-                            {
-                                sender.Depth += IsRampUpNegative ? 1 : -1;
-                                sender.Depth = (int)MathHelper.Clamp(sender.Depth, 0, Parent.Depth - 1);
-                            }
+                            var depthOffset = (sender.Rectangle.Right > Rectangle.Right) ? 1 : -1;
+                            sender.Depth = Depth + (IsRampUpNegative ? -1 : 1) * depthOffset;
                         }
+
+                        sender.Depth = (int)MathHelper.Clamp(sender.Depth, 0, Parent.Depth - 1);
                     }
                     else
                     {
                     }
 
-                    
+                    Console.WriteLine(sender.Depth);
                 }
 
                 var handler = Step;
@@ -135,14 +131,20 @@ namespace MemoryLeak.Core
                 for (var y = (int) (Math.Round(rect.Y)/Tile.Height) - 1; y < yMax; y++)
                 {
                     var tile = Get(x, y, z);
+                    var lower = Get(x, y, z - 1);
 
                     RectangleF rectangle = tile == null
                                                ? new RectangleF(x*Tile.Width, y*Tile.Height, Tile.Width, Tile.Height)
                                                : tile.Rectangle;
 
-                    if (rect.IntersectsWith(rectangle) &&
-                        ((tile != null && !tile.IsPassable) || tile == null))
-                        return false;
+                    if (rect.IntersectsWith(rectangle) && (lower != null && lower.IsRamp && tile == null))
+                    {
+                        lower.OnStep(sender);
+                        return true;
+                    }
+
+                    if(rect.IntersectsWith(rectangle) && ((tile != null && !tile.IsPassable) || tile == null))
+                    return false;
 
                     if (tile != null)
                     {
@@ -157,18 +159,8 @@ namespace MemoryLeak.Core
                             return false;
                         }
                     }
-                    else
+                    else if(lower != null)
                     {
-                        var lower = Get(x, y, z - 1);
-
-                        if (lower == null) continue;
-
-                        if (lower.IsRamp)
-                        {
-                            lower.OnStep(sender);
-                            return true;
-                        }
-
                         if (lower.Children.OfType<Physical>().Any(ii => !ii.IsWalkable))
                             return false;
                     }

@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using MemoryLeak.Entities;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace MemoryLeak.Core
 {
@@ -6,6 +7,7 @@ namespace MemoryLeak.Core
     {
         public Chunk Chunk { get; set; }
         public Camera Camera { get; set; }
+        public Physical Player { get; set; }
 
         public State(Chunk chunk = null, Camera camera = null)
         {

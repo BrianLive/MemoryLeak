@@ -119,7 +119,7 @@ namespace MemoryLeak.Entities
                 for (var y = (int) (Math.Round(Rectangle.Y)/Chunk.Tile.Height) - 1; y < yMax; y++)
                 {
                     var tile = Parent.Get(x, y, Depth);
-                    if (Rectangle.IntersectsWith(tile.Rectangle))
+                    if (tile != null && Rectangle.IntersectsWith(tile.Rectangle))
                         ParentTile = tile;
                 }
             }
