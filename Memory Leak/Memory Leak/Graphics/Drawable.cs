@@ -40,9 +40,7 @@ namespace MemoryLeak.Graphics
         public virtual void Draw(SpriteBatch spriteBatch)
         {
             if (Texture != null)
-            {
-                spriteBatch.Draw(Texture, new Vector2(Rectangle.Left, Rectangle.Top), null, Color, Rotation, Origin, Scale, SpriteEffects.None, Depth / (float)int.MaxValue);
-            }
+                spriteBatch.Draw(Texture, new Vector2(Rectangle.Left, Rectangle.Top), null, Color, Rotation, Origin, Scale, SpriteEffects.None, -Depth / float.MaxValue);
         }
     }
 }

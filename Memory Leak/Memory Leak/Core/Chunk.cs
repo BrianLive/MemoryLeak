@@ -87,6 +87,7 @@ namespace MemoryLeak.Core
 
             _tiles[x, y, z] = tile;
             tile.Position = new Vector2(x * Tile.Width, y * Tile.Height);
+            tile.Depth = z;
             tile.Parent = this;
         }
 
