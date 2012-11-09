@@ -177,10 +177,10 @@ namespace MemoryLeak.Core
 
             for (var x = xSize; x < xSize + (Game.Core.Resolution.X / 2); x++)
                 for (var y = ySize; y < ySize + (Game.Core.Resolution.Y / 2); y++)
-                    for (var z = 0; z < Depth; z++)
+                    //for (var z = 0; z < Depth; z++)
                         if (x < Width && y < Height && x >= 0 && y >= 0)
-                            if (_tiles[x, y, z] != null)
-                                _tiles[x, y, z].Draw(spriteBatch);
+                            if (_tiles[x, y, Parent.Player.Depth] != null)
+                                _tiles[x, y, Parent.Player.Depth].Draw(spriteBatch);
 
             foreach (var i in _entities)
                 i.Draw(spriteBatch);
