@@ -21,6 +21,7 @@ namespace MemoryLeak.Core
             public bool IsRampHorizontal { get; set; }
             public bool IsRampUpNegative { get; set; }
             public bool IsFloater { get; set; }
+            public bool IsFloaterLayered { get; set; }
             
             public Chunk Parent { get; set; }
 
@@ -36,6 +37,7 @@ namespace MemoryLeak.Core
                 IsRampHorizontal = false;
                 IsRampUpNegative = false;
                 IsFloater = false;
+                IsFloaterLayered = false;
             }
 
             public void OnStep(Physical sender)
@@ -48,22 +50,22 @@ namespace MemoryLeak.Core
                         {
                             if (IsRampUpNegative)
                             {
-                                if (sender.Rectangle.Left > Rectangle.Left) sender.Depth = Depth;
+                                if (sender.Rectangle.Left >= Rectangle.Left) sender.Depth = Depth;
                             }
                             else
                             {
-                                if (sender.Rectangle.Left > Rectangle.Left) sender.Depth = Depth + 1;
+                                if (sender.Rectangle.Left >= Rectangle.Left) sender.Depth = Depth + 1;
                             }
                         }
                         else if(sender.DirX == -1)
                         {
                             if (IsRampUpNegative)
                             {
-                                if (sender.Rectangle.Right < Rectangle.Right) sender.Depth = Depth + 1;
+                                if (sender.Rectangle.Right <= Rectangle.Right) sender.Depth = Depth + 1;
                             }
                             else
                             {
-                                if (sender.Rectangle.Right < Rectangle.Right) sender.Depth = Depth;
+                                if (sender.Rectangle.Right <= Rectangle.Right) sender.Depth = Depth;
                             }
                         }
                     }
@@ -214,22 +216,28 @@ namespace MemoryLeak.Core
             //Draw tiles here
             for (int x = xSize; x < xSize + (Game.Core.Resolution.X / 2); x++)
                 for (int y = ySize; y < ySize + (Game.Core.Resolution.Y / 2); y++)
-                    for (int z = Parent.Player.Depth + 1; z >= 0; z--)
+                    for (int z = 0; z <= Parent.Player.Depth + 1; z++)
                         if (x < Width && y < Height && z < Depth && x >= 0 && y >= 0 && z >= 0)
                         {
                             Tile tile = _tiles[x, y, z];
 
                             if (tile != null)
                             {
-                                tile.Draw(spriteBatch, Depth, (byte)((Parent.Player.Depth - tile.Depth) * (255 / Depth)));
+                                if (tile.IsFloater && !tile.IsFloaterLayered && tile.Depth == Parent.Player.Depth) continue;
+
+                                if(tile.IsFloater && tile.Depth > Parent.Player.Depth) tile.Draw(spriteBatch, Depth);
+                                else tile.Draw(spriteBatch, Depth, (byte)((Parent.Player.Depth - tile.Depth) * (255 / Depth)));
                             }
                         }
 
             //Draw entities here
             foreach (var i in _entities)
             {
-                if (i.Depth > Parent.Player.Depth) continue; //Don't draw entities above this layer
+                if (i.Depth > Parent.Player.Depth + 1) continue; //Don't draw entities above this layer
+
+                i.Depth++;
                 i.Draw(spriteBatch, Depth, (byte)((Parent.Player.Depth - i.Depth) * (255 / Depth)));
+                i.Depth--;
             }
         }
 

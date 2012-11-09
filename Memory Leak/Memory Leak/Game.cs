@@ -135,7 +135,7 @@ namespace MemoryLeak
             for (var xx = x; xx < (x + width); xx++)
                 for (var yy = y; yy < (y + height); yy++)
                 {
-                    chunk.Set(xx, yy, start, new Chunk.Tile(Resource<Texture2D>.Get("debug-two")) {IsFloater = true, IsPassable = true});
+                    chunk.Set(xx, yy, start, new Chunk.Tile(Resource<Texture2D>.Get("debug-two")) {IsFloater = true, IsFloaterLayered = true, IsPassable = true});
                 }
         }
 
