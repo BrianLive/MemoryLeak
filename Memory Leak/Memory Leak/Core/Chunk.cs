@@ -57,7 +57,19 @@ namespace MemoryLeak.Core
                     }
                     else
                     {
+                        if (sender.DirY == 1)
+                        {
+                            var depthOffset = (sender.Rectangle.Top > Rectangle.Top) ? 1 : -1;
+                            sender.Depth = (Depth + (IsRampUpNegative ? -1 : 1)) * depthOffset;
+                        }
+                        else if (sender.DirY == -1)
+                        {
+                            var depthOffset = (sender.Rectangle.Bottom > Rectangle.Bottom) ? 1 : -1;
+                            sender.Depth = Depth + (IsRampUpNegative ? -1 : 1) * depthOffset;
+                        }
                     }
+
+                    sender.Depth = (int)MathHelper.Clamp(sender.Depth, 0, Parent.Depth - 1);
 
                     Console.WriteLine(sender.Depth);
                 }
@@ -140,7 +152,7 @@ namespace MemoryLeak.Core
                     if (rect.IntersectsWith(rectangle) && (lower != null && lower.IsRamp && tile == null))
                     {
                         lower.OnStep(sender);
-                        return true;
+                        continue;
                     }
 
                     if(rect.IntersectsWith(rectangle) && ((tile != null && !tile.IsPassable) || tile == null))
