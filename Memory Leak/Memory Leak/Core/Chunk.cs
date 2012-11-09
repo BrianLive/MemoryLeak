@@ -215,7 +215,6 @@ namespace MemoryLeak.Core
             for (int x = xSize; x < xSize + (Game.Core.Resolution.X / 2); x++)
                 for (int y = ySize; y < ySize + (Game.Core.Resolution.Y / 2); y++)
                     for (int z = Parent.Player.Depth + 1; z >= 0; z--)
-
                         if (x < Width && y < Height && z < Depth && x >= 0 && y >= 0 && z >= 0)
                         {
                             Tile tile = _tiles[x, y, z];
@@ -230,9 +229,7 @@ namespace MemoryLeak.Core
             foreach (var i in _entities)
             {
                 if (i.Depth > Parent.Player.Depth) continue; //Don't draw entities above this layer
-                i.Depth++;
                 i.Draw(spriteBatch, Depth, (byte)((Parent.Player.Depth - i.Depth) * (255 / Depth)));
-                i.Depth--;
             }
         }
 
