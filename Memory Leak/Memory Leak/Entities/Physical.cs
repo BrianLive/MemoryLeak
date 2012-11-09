@@ -9,6 +9,7 @@ namespace MemoryLeak.Entities
 {
     public class Physical : Entity
     {
+        public bool DrawAbove { get; set; }
         public bool IsPassable { get; set; }
         public bool IsWalkable { get; set; }
 
@@ -27,21 +28,20 @@ namespace MemoryLeak.Entities
         {
             set
             {
-                var tiles = new Chunk.Tile[_parentTiles.Count];
-                _parentTiles.CopyTo(tiles);
+                _parentTiles.Add(value);
+                var tiles = new List<Chunk.Tile>(_parentTiles);
 
-                foreach (var i in tiles.Where(i => !Rectangle.IntersectsWith(i.Rectangle)))
+                foreach (var i in tiles.Where(i => (!Rectangle.IntersectsWith(i.Rectangle) || i.Depth != Depth)))
                 {
                     _parentTiles.Remove(i);
                 }
-
-                _parentTiles.Add(value);
             }
         }
 
         public Physical(Texture2D texture, int x, int y, int z, bool isPassable = false) : base(texture, x, y, z)
         {
             IsPassable = isPassable;
+            DrawAbove = true;
         }
 
         public void Move(int x, int y, float rate)
@@ -120,7 +120,7 @@ namespace MemoryLeak.Entities
                 {
                     var tile = Parent.Get(x, y, Depth);
                     if (tile != null && Rectangle.IntersectsWith(tile.Rectangle))
-                        ParentTile = tile;
+                        if(!_parentTiles.Contains(tile)) ParentTile = tile;
                 }
             }
         }

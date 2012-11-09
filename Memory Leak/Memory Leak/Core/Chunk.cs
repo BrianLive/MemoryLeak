@@ -20,6 +20,7 @@ namespace MemoryLeak.Core
             public bool IsRamp { get; set; }
             public bool IsRampHorizontal { get; set; }
             public bool IsRampUpNegative { get; set; }
+            public bool IsFloater { get; set; }
             
             public Chunk Parent { get; set; }
 
@@ -34,6 +35,7 @@ namespace MemoryLeak.Core
                 IsRamp = false;
                 IsRampHorizontal = false;
                 IsRampUpNegative = false;
+                IsFloater = false;
             }
 
             public void OnStep(Physical sender)
@@ -91,7 +93,7 @@ namespace MemoryLeak.Core
                         }
                     }
 
-                    sender.Depth = (int)MathHelper.Clamp(sender.Depth, 0, Parent.Depth - 1);
+                    sender.Depth = (int)MathHelper.Clamp(sender.Depth, 0, Parent.Depth);
                 }
 
                 var handler = Step;
@@ -211,21 +213,21 @@ namespace MemoryLeak.Core
 
             for (var x = xSize; x < xSize + (Game.Core.Resolution.X / 2); x++)
                 for (var y = ySize; y < ySize + (Game.Core.Resolution.Y / 2); y++)
-                    for (var z = 0; z < Depth; z++)
-                        if (x < Width && y < Height && x >= 0 && y >= 0)
+                    for (var z = Parent.Player.Depth + 1; z >= 0; z--)
+                        if (x < Width && y < Height && z < Depth && x >= 0 && y >= 0 && z >= 0)
                         {
-                            if(z > Parent.Player.Depth) continue;
-                            
                             var tile = _tiles[x, y, z];
 
                             if (tile != null)
-                                tile.Draw(spriteBatch, (byte)((Parent.Player.Depth - tile.Depth) * (255/10)));
+                            {
+                                tile.Draw(spriteBatch, Depth, (byte) ((Parent.Player.Depth - tile.Depth)*(255/Depth)));
+                            }
                         }
 
             foreach (var i in _entities)
             {
                 if(i.Depth > Parent.Player.Depth) continue;
-                i.Draw(spriteBatch, (byte)((Parent.Player.Depth - i.Depth) * (255 / 10)));
+                i.Draw(spriteBatch, Depth, (byte) ((Parent.Player.Depth - i.Depth)*(255/Depth)));
             }
         }
 
