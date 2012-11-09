@@ -85,6 +85,7 @@
     <Compile Include="Audio\Sound.cs" />
     <Compile Include="Core\Camera.cs" />
     <Compile Include="Core\Chunk.cs" />
+    <Compile Include="Core\Region.cs" />
     <Compile Include="Entities\Physical.cs" />
     <Compile Include="Graphics\Drawable.cs" />
     <Compile Include="Core\Entity.cs" />
