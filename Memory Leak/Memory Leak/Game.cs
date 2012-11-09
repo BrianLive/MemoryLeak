@@ -94,12 +94,25 @@ namespace MemoryLeak
             //Resource<Sound>.Get("austin_beatbox").IsLooped = true;
             //Resource<Sound>.Get("austin_beatbox").Play();
 
-            var chunk = new Chunk(32, 32);
+            var chunk = new Chunk(32, 32, 2);
             var camera = new Camera();
 
             for (var x = 0; x < chunk.Width; x++)
                 for (var y = 0; y < chunk.Height; y++ )
                     chunk.Set(x, y, 0, new Chunk.Tile(Resource<Texture2D>.Get("debug")) {IsPassable = true});
+
+            for(var x = 10; x < 13; x++)
+                for(var y = 10; y < 13; y++)
+                    chunk.Set(x, y, 1, new Chunk.Tile(Resource<Texture2D>.Get("debug-two")) {IsPassable = true});
+
+            chunk.Set(9, 10, 0, new Chunk.Tile(Resource<Texture2D>.Get("debug-ramp")) {IsPassable = true, IsRamp = true, RampDirection = 1});
+            chunk.Set(9, 10, 1, new Chunk.Tile(Resource<Texture2D>.Get("debug-ramp")) { IsPassable = true, IsRamp = true, RampDirection = -1 });
+
+            chunk.Set(9, 11, 0, new Chunk.Tile(Resource<Texture2D>.Get("debug-ramp")) { IsPassable = true, IsRamp = true, RampDirection = 1 });
+            chunk.Set(9, 11, 1, new Chunk.Tile(Resource<Texture2D>.Get("debug-ramp")) { IsPassable = true, IsRamp = true, RampDirection = -1 });
+
+            chunk.Set(9, 12, 0, new Chunk.Tile(Resource<Texture2D>.Get("debug-ramp")) { IsPassable = true, IsRamp = true, RampDirection = 1 });
+            chunk.Set(9, 12, 1, new Chunk.Tile(Resource<Texture2D>.Get("debug-ramp")) { IsPassable = true, IsRamp = true, RampDirection = -1 });
 
             var player = new Physical(Resource<Texture2D>.Get("debug-entity"), 2, 2, 0);
 

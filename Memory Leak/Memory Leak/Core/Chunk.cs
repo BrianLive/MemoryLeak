@@ -18,6 +18,7 @@ namespace MemoryLeak.Core
 
             public bool IsPassable { get; set; }
             public bool IsRamp { get; set; }
+            public int RampDirection { get; set; }
 
             public Chunk Parent { get; set; }
 
@@ -29,10 +30,14 @@ namespace MemoryLeak.Core
                 : base(texture)
             {
                 IsPassable = false;
+                IsRamp = false;
+                RampDirection = 0;
             }
 
             public void OnStep(Drawable sender)
             {
+                if(IsRamp) sender.Depth = Math.Max(0, Math.Max(Parent.Depth - 1, Depth + RampDirection));
+
                 var handler = Step;
                 if (handler != null) handler(sender);
             }
