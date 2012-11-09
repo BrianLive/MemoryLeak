@@ -230,7 +230,9 @@ namespace MemoryLeak.Core
             foreach (var i in _entities)
             {
                 if (i.Depth > Parent.Player.Depth) continue; //Don't draw entities above this layer
+                i.Depth++;
                 i.Draw(spriteBatch, Depth, (byte)((Parent.Player.Depth - i.Depth) * (255 / Depth)));
+                i.Depth--;
             }
         }
 
