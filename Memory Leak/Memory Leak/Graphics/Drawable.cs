@@ -49,7 +49,7 @@ namespace MemoryLeak.Graphics
                     Origin,
                     Scale,
                     SpriteEffects.None,
-                    (Depth / (float)maxDepth));
+                    1 - (Depth / (float)maxDepth));
         }
     }
 }

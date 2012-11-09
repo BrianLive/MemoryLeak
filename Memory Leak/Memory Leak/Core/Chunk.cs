@@ -211,23 +211,26 @@ namespace MemoryLeak.Core
             var xSize = (int)(((Parent.Camera.Position.X - (Game.Core.Resolution.X / 2)) / (int)Tile.Width) * Parent.Camera.Zoom);
             var ySize = (int)(((Parent.Camera.Position.Y - (Game.Core.Resolution.Y / 2)) / (int)Tile.Height) * Parent.Camera.Zoom);
 
-            for (var x = xSize; x < xSize + (Game.Core.Resolution.X / 2); x++)
-                for (var y = ySize; y < ySize + (Game.Core.Resolution.Y / 2); y++)
-                    for (var z = Parent.Player.Depth + 1; z >= 0; z--)
+            //Draw tiles here
+            for (int x = xSize; x < xSize + (Game.Core.Resolution.X / 2); x++)
+                for (int y = ySize; y < ySize + (Game.Core.Resolution.Y / 2); y++)
+                    for (int z = Parent.Player.Depth + 1; z >= 0; z--)
+
                         if (x < Width && y < Height && z < Depth && x >= 0 && y >= 0 && z >= 0)
                         {
-                            var tile = _tiles[x, y, z];
+                            Tile tile = _tiles[x, y, z];
 
                             if (tile != null)
                             {
-                                tile.Draw(spriteBatch, Depth, (byte) ((Parent.Player.Depth - tile.Depth)*(255/Depth)));
+                                tile.Draw(spriteBatch, Depth, (byte)((Parent.Player.Depth - tile.Depth) * (255 / Depth)));
                             }
                         }
 
+            //Draw entities here
             foreach (var i in _entities)
             {
-                if(i.Depth > Parent.Player.Depth) continue;
-                i.Draw(spriteBatch, Depth, (byte) ((Parent.Player.Depth - i.Depth)*(255/Depth)));
+                if (i.Depth > Parent.Player.Depth) continue; //Don't draw entities above this layer
+                i.Draw(spriteBatch, Depth, (byte)((Parent.Player.Depth - i.Depth) * (255 / Depth)));
             }
         }
 
