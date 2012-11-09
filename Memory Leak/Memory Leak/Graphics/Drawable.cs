@@ -39,10 +39,10 @@ namespace MemoryLeak.Graphics
             Height = Texture.Height;
         }
 
-        public virtual void Draw(SpriteBatch spriteBatch)
+        public virtual void Draw(SpriteBatch spriteBatch, byte darkness = 255)
         {
             if (Texture != null)
-                spriteBatch.Draw(Texture, new Vector2(Rectangle.Left, Rectangle.Top), null, Color, Rotation, Origin, Scale, SpriteEffects.None, -Depth / float.MaxValue);
+                spriteBatch.Draw(Texture, new Vector2(Rectangle.Left, Rectangle.Top), null, new Color(Color.R - darkness, Color.G - darkness, Color.B - darkness, Color.A), Rotation, Origin, Scale, SpriteEffects.None, -Depth / float.MaxValue);
         }
     }
 }

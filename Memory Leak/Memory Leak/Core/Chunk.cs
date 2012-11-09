@@ -44,34 +44,54 @@ namespace MemoryLeak.Core
                     {
                         if(sender.DirX == 1)
                         {
-                                var depthOffset = (sender.Rectangle.Left > Rectangle.Left) ? 1 : -1;
-                                sender.Depth = (Depth + (IsRampUpNegative ? -1 : 1)) * depthOffset;
+                            if (IsRampUpNegative)
+                            {
+                                if (sender.Rectangle.Left > Rectangle.Left) sender.Depth = Depth;
+                            }
+                            else
+                            {
+                                if (sender.Rectangle.Left > Rectangle.Left) sender.Depth = Depth + 1;
+                            }
                         }
                         else if(sender.DirX == -1)
                         {
-                            var depthOffset = (sender.Rectangle.Right > Rectangle.Right) ? 1 : -1;
-                            sender.Depth = Depth + (IsRampUpNegative ? -1 : 1) * depthOffset;
+                            if (IsRampUpNegative)
+                            {
+                                if (sender.Rectangle.Right < Rectangle.Right) sender.Depth = Depth + 1;
+                            }
+                            else
+                            {
+                                if (sender.Rectangle.Right < Rectangle.Right) sender.Depth = Depth;
+                            }
                         }
-
-                        sender.Depth = (int)MathHelper.Clamp(sender.Depth, 0, Parent.Depth - 1);
                     }
                     else
                     {
                         if (sender.DirY == 1)
                         {
-                            var depthOffset = (sender.Rectangle.Top > Rectangle.Top) ? 1 : -1;
-                            sender.Depth = (Depth + (IsRampUpNegative ? -1 : 1)) * depthOffset;
+                            if (IsRampUpNegative)
+                            {
+                                if (sender.Rectangle.Top > Rectangle.Top) sender.Depth = Depth;
+                            }
+                            else
+                            {
+                                if (sender.Rectangle.Top > Rectangle.Top) sender.Depth = Depth + 1;
+                            }
                         }
                         else if (sender.DirY == -1)
                         {
-                            var depthOffset = (sender.Rectangle.Bottom > Rectangle.Bottom) ? 1 : -1;
-                            sender.Depth = Depth + (IsRampUpNegative ? -1 : 1) * depthOffset;
+                            if (IsRampUpNegative)
+                            {
+                                if (sender.Rectangle.Bottom < Rectangle.Bottom) sender.Depth = Depth + 1;
+                            }
+                            else
+                            {
+                                if (sender.Rectangle.Bottom < Rectangle.Bottom) sender.Depth = Depth;
+                            }
                         }
                     }
 
                     sender.Depth = (int)MathHelper.Clamp(sender.Depth, 0, Parent.Depth - 1);
-
-                    Console.WriteLine(sender.Depth);
                 }
 
                 var handler = Step;
@@ -117,11 +137,13 @@ namespace MemoryLeak.Core
 
         public void Set(int x, int y, int z, Tile tile)
         {
-            x = Math.Max(0, x);
-            y = Math.Max(0, y);
-            z = Math.Max(0, z);
+            x = Math.Max(0, Math.Min(x, Width - 1));
+            y = Math.Max(0, Math.Min(y, Height - 1));
+            z = Math.Max(0, Math.Min(z, Depth - 1));
 
             _tiles[x, y, z] = tile;
+
+            if (tile == null) return;
             tile.Position = new Vector2(x * Tile.Width, y * Tile.Height);
             tile.Depth = z;
             tile.Parent = this;
@@ -189,13 +211,22 @@ namespace MemoryLeak.Core
 
             for (var x = xSize; x < xSize + (Game.Core.Resolution.X / 2); x++)
                 for (var y = ySize; y < ySize + (Game.Core.Resolution.Y / 2); y++)
-                    //for (var z = 0; z < Depth; z++)
+                    for (var z = 0; z < Depth; z++)
                         if (x < Width && y < Height && x >= 0 && y >= 0)
-                            if (_tiles[x, y, Parent.Player.Depth] != null)
-                                _tiles[x, y, Parent.Player.Depth].Draw(spriteBatch);
+                        {
+                            if(z > Parent.Player.Depth) continue;
+                            
+                            var tile = _tiles[x, y, z];
+
+                            if (tile != null)
+                                tile.Draw(spriteBatch, (byte)((Parent.Player.Depth - tile.Depth) * (255/10)));
+                        }
 
             foreach (var i in _entities)
-                i.Draw(spriteBatch);
+            {
+                if(i.Depth > Parent.Player.Depth) continue;
+                i.Draw(spriteBatch, (byte)((Parent.Player.Depth - i.Depth) * (255 / 10)));
+            }
         }
 
         public void Update(float delta)

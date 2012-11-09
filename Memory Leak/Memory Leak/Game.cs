@@ -1,4 +1,5 @@
 using System;
+using MemoryLeak.Audio;
 using MemoryLeak.Core;
 using MemoryLeak.Entities;
 using Microsoft.Xna.Framework;
@@ -87,26 +88,60 @@ namespace MemoryLeak
             base.Draw(gameTime);
         }
 
+        private static void ElevateLand(Chunk chunk, int x, int y, int width, int height, int start)
+        {
+            for (var xx = x; xx < (x + width); xx++)
+                for (var yy = y; yy < (y + height); yy++)
+                {
+                    chunk.Set(xx, yy, start, null);
+
+                    if (xx == (x + (width / 2)) && yy == y)
+                    {
+                        chunk.Set(xx, yy, start, new Chunk.Tile(Resource<Texture2D>.Get("debug-ramp")) { IsPassable = true, IsRamp = true, IsRampHorizontal = false, IsRampUpNegative = false });
+                        continue;
+                    }
+
+                    if (xx == (x + width - 1) && yy == (y + (height / 2)))
+                    {
+                        chunk.Set(xx, yy, start, new Chunk.Tile(Resource<Texture2D>.Get("debug-ramp")) { IsPassable = true, IsRamp = true, IsRampHorizontal = true, IsRampUpNegative = true });
+                        continue;
+                    }
+
+                    if (xx == (x + (width / 2)) && yy == (y + height - 1))
+                    {
+                        chunk.Set(xx, yy, start, new Chunk.Tile(Resource<Texture2D>.Get("debug-ramp")) { IsPassable = true, IsRamp = true, IsRampHorizontal = false, IsRampUpNegative = true });
+                        continue;
+                    }
+
+                    if (xx == x && yy == (y + (height/2)))
+                    {
+                        chunk.Set(xx, yy, start, new Chunk.Tile(Resource<Texture2D>.Get("debug-ramp")) { IsPassable = true, IsRamp = true, IsRampHorizontal = true, IsRampUpNegative = false });
+                        continue;
+                    }
+
+                    chunk.Set(xx, yy, start + 1, new Chunk.Tile(Resource<Texture2D>.Get("debug-two")) { IsPassable = true });
+                    chunk.Set(xx, yy, start + 1, new Chunk.Tile(Resource<Texture2D>.Get("debug-two")) { IsPassable = true });
+                }
+        }
+
         private static State LoadDebugMap()
         {
             //disabled because otherwise it gets annoying to run the game while listening to music and stuff
-            //Resource<Sound>.Get("austin_beatbox").IsLooped = true;
-            //Resource<Sound>.Get("austin_beatbox").Play();
+            Resource<Sound>.Get("austin_beatbox").IsLooped = true;
+            Resource<Sound>.Get("austin_beatbox").Play();
 
-            var chunk = new Chunk(32, 32, 2);
+            var chunk = new Chunk(32, 32, 4);
             var camera = new Camera();
 
             for (var x = 0; x < chunk.Width; x++)
                 for (var y = 0; y < chunk.Height; y++ )
                     chunk.Set(x, y, 0, new Chunk.Tile(Resource<Texture2D>.Get("debug")) {IsPassable = true});
 
-            for(var x = 10; x < 13; x++)
-                for(var y = 10; y < 13; y++)
-                    chunk.Set(x, y, 1, new Chunk.Tile(Resource<Texture2D>.Get("debug-two")) {IsPassable = true});
+            ElevateLand(chunk, 5, 5, 15, 15, 0);
+            ElevateLand(chunk, 7, 7, 11, 11, 1);
+            ElevateLand(chunk, 9, 9, 7, 7, 2);
+            ElevateLand(chunk, 11, 11, 3, 3, 3);
 
-            chunk.Set(9, 9, 0, new Chunk.Tile(Resource<Texture2D>.Get("debug-two")) { IsPassable = false });
-            chunk.Set(9, 11, 0, new Chunk.Tile(Resource<Texture2D>.Get("debug-two")) { IsPassable = false });
-            chunk.Set(9, 10, 0, new Chunk.Tile(Resource<Texture2D>.Get("debug-ramp")) {IsPassable = true, IsRamp = true, IsRampHorizontal = true, IsRampUpNegative = false});
             var player = new Physical(Resource<Texture2D>.Get("debug-entity"), 2, 2, 0);
 
             player.Tick += dt =>
