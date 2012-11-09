@@ -37,6 +37,9 @@ namespace MemoryLeak
 
             _graphics = new GraphicsDeviceManager(this);
             Core.GraphicsDeviceManager = _graphics;
+
+            _graphics.PreferredBackBufferWidth = 1280;
+            _graphics.PreferredBackBufferHeight = 720;
         }
 
         protected override void LoadContent()
@@ -140,8 +143,8 @@ namespace MemoryLeak
         private static State LoadDebugMap()
         {
             //disabled because otherwise it gets annoying to run the game while listening to music and stuff
-            Resource<Sound>.Get("austin_beatbox").IsLooped = true;
-            Resource<Sound>.Get("austin_beatbox").Play();
+            //Resource<Sound>.Get("austin_beatbox").IsLooped = true;
+            //Resource<Sound>.Get("austin_beatbox").Play();
 
             var chunk = new Chunk(64, 64, 5);
             var camera = new Camera();
