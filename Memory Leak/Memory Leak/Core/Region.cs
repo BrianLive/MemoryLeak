@@ -11,7 +11,5 @@ namespace MemoryLeak.Core
             Area = new RectangleF(x*Chunk.Tile.Width, y*Chunk.Tile.Height, width*Chunk.Tile.Width,
                                   height*Chunk.Tile.Height);
         }
-
-
     }
 }

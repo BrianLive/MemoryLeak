@@ -18,25 +18,53 @@ namespace MemoryLeak.Core
 
             public bool IsPassable { get; set; }
             public bool IsRamp { get; set; }
-            public int RampDirection { get; set; }
-
+            public bool IsRampHorizontal { get; set; }
+            public bool IsRampUpNegative { get; set; }
+            
             public Chunk Parent { get; set; }
 
             public List<Entity> Children = new List<Entity>();
 
-            public event Action<Drawable> Step;
+            public event Action<Physical> Step;
 
             public Tile(Texture2D texture)
                 : base(texture)
             {
                 IsPassable = false;
                 IsRamp = false;
-                RampDirection = 0;
+                IsRampHorizontal = false;
+                IsRampUpNegative = false;
             }
 
-            public void OnStep(Drawable sender)
+            public void OnStep(Physical sender)
             {
-                if(IsRamp) sender.Depth = Math.Max(0, Math.Max(Parent.Depth - 1, Depth + RampDirection));
+                if (IsRamp)
+                {
+                    if (IsRampHorizontal)
+                    {
+                        if(sender.DirX == 1)
+                        {
+                            if (sender.Rectangle.Left > Rectangle.Left)
+                            {
+                                sender.Depth += IsRampUpNegative ? -1 : 1;
+                                sender.Depth = (int)MathHelper.Clamp(sender.Depth, 0, Parent.Depth - 1);
+                            }
+                        }
+                        else if(sender.DirX == -1)
+                        {
+                            if (sender.Rectangle.Right < Rectangle.Right)
+                            {
+                                sender.Depth += IsRampUpNegative ? 1 : -1;
+                                sender.Depth = (int)MathHelper.Clamp(sender.Depth, 0, Parent.Depth - 1);
+                            }
+                        }
+                    }
+                    else
+                    {
+                    }
+
+                    
+                }
 
                 var handler = Step;
                 if (handler != null) handler(sender);
@@ -134,6 +162,13 @@ namespace MemoryLeak.Core
                         var lower = Get(x, y, z - 1);
 
                         if (lower == null) continue;
+
+                        if (lower.IsRamp)
+                        {
+                            lower.OnStep(sender);
+                            return true;
+                        }
+
                         if (lower.Children.OfType<Physical>().Any(ii => !ii.IsWalkable))
                             return false;
                     }

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using MemoryLeak.Core;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -10,28 +12,30 @@ namespace MemoryLeak.Entities
         public bool IsPassable { get; set; }
         public bool IsWalkable { get; set; }
 
-        public event Action<Physical> Collision;
+        public int DirX { get; private set; }
+        public int DirY { get; private set; }
 
-        private Chunk.Tile _parentTile;
+        private Vector2 _velocity = Vector2.Zero;
+        public Vector2 Velocity { get { return _velocity; } }
+
+        public event Action<Physical> Collision;
+        private readonly List<Chunk.Tile> _parentTiles = new List<Chunk.Tile>();
+
         private float _hSave, _vSave;
 
         public Chunk.Tile ParentTile
         {
-            get { return _parentTile; }
             set
             {
-                Chunk.Tile old = null;
-                if (ParentTile != null) old = ParentTile;
-                _parentTile = value;
+                var tiles = new Chunk.Tile[_parentTiles.Count];
+                _parentTiles.CopyTo(tiles);
 
-                if (old == null || (old == _parentTile))
+                foreach (var i in tiles.Where(i => !Rectangle.IntersectsWith(i.Rectangle)))
                 {
-                    if (_parentTile != null && !_parentTile.Children.Contains(this)) _parentTile.Children.Add(this);
-                    return;
+                    _parentTiles.Remove(i);
                 }
 
-                if (old.Children.Contains(this)) old.Children.Remove(this);
-                if (_parentTile != null && !_parentTile.Children.Contains(this)) ParentTile.Children.Add(this);
+                _parentTiles.Add(value);
             }
         }
 
@@ -44,14 +48,16 @@ namespace MemoryLeak.Entities
         {
             rate = Math.Abs(rate);
 
-            float hMove = rate*x;
-            float vMove = rate*y;
+            _velocity = new Vector2(rate*x, rate*y);
 
-            int hRep = (int) Math.Floor(Math.Abs(hMove));
-            int vRep = (int) Math.Floor(Math.Abs(vMove));
+            DirX = _velocity.X > 0 ? 1 : -1;
+            DirY = _velocity.Y > 0 ? 1 : -1;
 
-            _hSave += (float) (Math.Abs(hMove) - Math.Floor(Math.Abs(hMove)));
-            _vSave += (float) (Math.Abs(vMove) - Math.Floor(Math.Abs(vMove)));
+            int hRep = (int) Math.Floor(Math.Abs(_velocity.X));
+            int vRep = (int) Math.Floor(Math.Abs(_velocity.Y));
+
+            _hSave += (float) (Math.Abs(_velocity.X) - Math.Floor(Math.Abs(_velocity.X)));
+            _vSave += (float) (Math.Abs(_velocity.Y) - Math.Floor(Math.Abs(_velocity.Y)));
 
             while(_hSave >= 1.0)
             {
@@ -69,7 +75,7 @@ namespace MemoryLeak.Entities
 
             while(hRep-- > 0)
             {
-                testRect.X += Math.Sign(hMove);
+                testRect.X += Math.Sign(_velocity.X);
 
                 if(!Parent.PlaceFree(this, testRect, Depth))
                 {
@@ -77,7 +83,7 @@ namespace MemoryLeak.Entities
                     break;
                 }
 
-                Position += new Vector2(Math.Sign(hMove), 0);
+                Position += new Vector2(Math.Sign(_velocity.X), 0);
                 CorrectParent();
             }
 
@@ -85,7 +91,7 @@ namespace MemoryLeak.Entities
 
             while(vRep-- > 0)
             {
-                testRect.Y += Math.Sign(vMove);
+                testRect.Y += Math.Sign(_velocity.Y);
 
                 if(!Parent.PlaceFree(this, testRect, Depth))
                 {
@@ -93,17 +99,30 @@ namespace MemoryLeak.Entities
                     break;
                 }
 
-                Position += new Vector2(0, Math.Sign(vMove));
+                Position += new Vector2(0, Math.Sign(_velocity.Y));
                 CorrectParent();
             }
 
-            if (ParentTile != null) ParentTile.OnStep(this);
+            foreach(var i in _parentTiles)
+                i.OnStep(this);
         }
 
         public void CorrectParent()
         {
             if (Parent == null) return;
-            ParentTile = Parent.Get((int)(CenterPosition.X / Width), (int)(CenterPosition.Y / Height), Depth);
+
+            int xMax = (int) (Math.Round(Rectangle.Right)/Chunk.Tile.Width) + 1;
+            int yMax = (int) (Math.Round(Rectangle.Bottom)/Chunk.Tile.Height) + 1;
+
+            for (var x = (int)(Math.Round(Rectangle.X) / Chunk.Tile.Width) - 1; x < xMax; x++)
+            {
+                for (var y = (int) (Math.Round(Rectangle.Y)/Chunk.Tile.Height) - 1; y < yMax; y++)
+                {
+                    var tile = Parent.Get(x, y, Depth);
+                    if (Rectangle.IntersectsWith(tile.Rectangle))
+                        ParentTile = tile;
+                }
+            }
         }
 
         public void OnCollision(Physical sender)

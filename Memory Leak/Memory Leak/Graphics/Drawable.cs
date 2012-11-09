@@ -35,6 +35,8 @@ namespace MemoryLeak.Graphics
             Origin = Vector2.Zero;
             Color = Color.White;
             Scale = Vector2.One;
+            Width = Texture.Width;
+            Height = Texture.Height;
         }
 
         public virtual void Draw(SpriteBatch spriteBatch)

@@ -1,7 +1,6 @@
 using System;
 using MemoryLeak.Core;
 using MemoryLeak.Entities;
-using MemoryLeak.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -105,15 +104,9 @@ namespace MemoryLeak
                 for(var y = 10; y < 13; y++)
                     chunk.Set(x, y, 1, new Chunk.Tile(Resource<Texture2D>.Get("debug-two")) {IsPassable = true});
 
-            chunk.Set(9, 10, 0, new Chunk.Tile(Resource<Texture2D>.Get("debug-ramp")) {IsPassable = true, IsRamp = true, RampDirection = 1});
-            chunk.Set(9, 10, 1, new Chunk.Tile(Resource<Texture2D>.Get("debug-ramp")) { IsPassable = true, IsRamp = true, RampDirection = -1 });
-
-            chunk.Set(9, 11, 0, new Chunk.Tile(Resource<Texture2D>.Get("debug-ramp")) { IsPassable = true, IsRamp = true, RampDirection = 1 });
-            chunk.Set(9, 11, 1, new Chunk.Tile(Resource<Texture2D>.Get("debug-ramp")) { IsPassable = true, IsRamp = true, RampDirection = -1 });
-
-            chunk.Set(9, 12, 0, new Chunk.Tile(Resource<Texture2D>.Get("debug-ramp")) { IsPassable = true, IsRamp = true, RampDirection = 1 });
-            chunk.Set(9, 12, 1, new Chunk.Tile(Resource<Texture2D>.Get("debug-ramp")) { IsPassable = true, IsRamp = true, RampDirection = -1 });
-
+            chunk.Set(9, 9, 0, new Chunk.Tile(Resource<Texture2D>.Get("debug-two")) { IsPassable = false });
+            chunk.Set(9, 11, 0, new Chunk.Tile(Resource<Texture2D>.Get("debug-two")) { IsPassable = false });
+            chunk.Set(9, 10, 0, new Chunk.Tile(Resource<Texture2D>.Get("debug-ramp")) {IsPassable = true, IsRamp = true, IsRampHorizontal = true, IsRampUpNegative = false});
             var player = new Physical(Resource<Texture2D>.Get("debug-entity"), 2, 2, 0);
 
             player.Tick += dt =>
