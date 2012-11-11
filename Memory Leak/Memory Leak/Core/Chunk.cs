@@ -42,8 +42,11 @@ namespace MemoryLeak.Core
 
             public void OnStep(Physical sender)
             {
+                var startDepth = sender.Depth;
+
                 if (IsRamp)
                 {
+                    Console.WriteLine("called it");
                     if (IsRampHorizontal)
                     {
                         if(sender.DirX == 1)
@@ -75,23 +78,42 @@ namespace MemoryLeak.Core
                         {
                             if (IsRampUpNegative)
                             {
-                                if (sender.Rectangle.Top > Rectangle.Top) sender.Depth = Depth;
+                                if (sender.Rectangle.Top >= Rectangle.Top) sender.Depth = Depth;
                             }
                             else
                             {
-                                if (sender.Rectangle.Top > Rectangle.Top) sender.Depth = Depth + 1;
+                                if (sender.Rectangle.Top >= Rectangle.Top) sender.Depth = Depth + 1;
                             }
                         }
                         else if (sender.DirY == -1)
                         {
                             if (IsRampUpNegative)
                             {
-                                if (sender.Rectangle.Bottom < Rectangle.Bottom) sender.Depth = Depth + 1;
+                                if (sender.Rectangle.Bottom <= Rectangle.Bottom) sender.Depth = Depth + 1;
                             }
                             else
                             {
-                                if (sender.Rectangle.Bottom < Rectangle.Bottom) sender.Depth = Depth;
+                                if (sender.Rectangle.Bottom <= Rectangle.Bottom) sender.Depth = Depth;
                             }
+                        }
+                    }
+
+                    foreach(var rectangle in Parent.GetNearbyRects(sender.Rectangle, sender.Depth))
+                    {
+                        int x = (int) Math.Round(rectangle.X/Width);
+                        int y = (int) Math.Round(rectangle.Y/Height);
+                        int z = (int) Math.Round(sender.Depth);
+
+                        var tile = Parent.Get(x, y, z);
+
+                        if(sender.Rectangle.IntersectsWith(rectangle))
+                        {
+                            var lower = Parent.Get(x, y, z - 1);
+
+                            if ((tile != null && (tile.IsRamp || tile.IsPassable)) || (lower != null && lower.IsRamp)) continue;
+
+                            sender.Depth = startDepth;
+                            break;
                         }
                     }
 
@@ -159,9 +181,10 @@ namespace MemoryLeak.Core
             return null;
         }
 
-        public bool PlaceFree(Physical sender, RectangleF rect, float depth, bool secondCheck = false)
+        public List<RectangleF> GetNearbyRects(RectangleF rect, float depth)
         {
-            int z = (int)(float)Math.Floor(depth);
+            var tiles = new List<RectangleF>();
+            int z = (int) (float) Math.Floor(depth);
             int xMax = (int) (Math.Round(rect.Right)/Tile.Width) + 1;
             int yMax = (int) (Math.Round(rect.Bottom)/Tile.Height) + 1;
 
@@ -170,50 +193,51 @@ namespace MemoryLeak.Core
                 for (var y = (int) (Math.Round(rect.Y)/Tile.Height) - 1; y < yMax; y++)
                 {
                     var tile = Get(x, y, z);
-                    var lower = Get(x, y, z - 1);
-                    var upper = Get(x, y, z + 1);
 
                     RectangleF rectangle = tile == null
                                                ? new RectangleF(x*Tile.Width, y*Tile.Height, Tile.Width, Tile.Height)
                                                : tile.Rectangle;
 
-                    if (rect.IntersectsWith(rectangle) && (((lower != null && lower.IsRamp) || (upper != null && upper.IsRamp)) && tile == null))
-                    {
-                        if(lower != null)
-                        {
-                            if (!secondCheck && PlaceFree(sender, rect, depth - 1, true))
-                                lower.OnStep(sender);
-                        }
-                        else
-                        {
-                            if (!secondCheck && PlaceFree(sender, rect, depth + 1, true))
-                                upper.OnStep(sender);
-                        }
+                    tiles.Add(rectangle);
+                }
+            }
 
-                        continue;
-                    }
+            return tiles;
+        }
 
-                    if(rect.IntersectsWith(rectangle) && ((tile != null && !tile.IsPassable) || tile == null))
+        public bool PlaceFree(Physical sender, RectangleF rect, float depth)
+        {
+            foreach(var rectangle in GetNearbyRects(rect, depth))
+            {
+                int x = (int)Math.Round(rectangle.X / Tile.Width);
+                int y = (int)Math.Round(rectangle.Y / Tile.Height);
+                int z = (int)Math.Round(depth);
+
+                var tile = Get(x, y, z);
+                var lower = Get(x, y, z - 1);
+
+                if (rect.IntersectsWith(rectangle) && (lower != null && lower.IsRamp && tile == null))
+                {
+                    lower.OnStep(sender);
+                    continue;
+                }
+
+                if (rect.IntersectsWith(rectangle) && ((tile != null && !tile.IsPassable) || tile == null))
                     return false;
 
-                    if (tile != null)
+                if (tile != null)
+                {
+                    foreach (var ii in tile.Children.OfType<Physical>().Where(ii => ii != sender).Where(ii => !ii.IsPassable && rect.IntersectsWith(ii.Rectangle)))
                     {
-                        foreach (var i in tile.Children)
-                        {
-                            var ii = i as Physical;
-                            if (ii == null) continue;
-                            if (ii == sender) continue;
-                            if (ii.IsPassable || !rect.IntersectsWith(ii.Rectangle)) continue;
-                            sender.OnCollision(ii);
-                            ii.OnCollision(sender);
-                            return false;
-                        }
+                        sender.OnCollision(ii);
+                        ii.OnCollision(sender);
+                        return false;
                     }
-                    else if(lower != null)
-                    {
-                        if (lower.Children.OfType<Physical>().Any(ii => !ii.IsWalkable))
-                            return false;
-                    }
+                }
+                else if (lower != null)
+                {
+                    if (lower.Children.OfType<Physical>().Any(ii => !ii.IsWalkable))
+                        return false;
                 }
             }
 
