@@ -91,54 +91,6 @@ namespace MemoryLeak
             base.Draw(gameTime);
         }
 
-        private static void ElevateLand(Chunk chunk, int x, int y, int width, int height, int start)
-        {
-            for (var xx = x; xx < (x + width); xx++)
-                for (var yy = y; yy < (y + height); yy++)
-                {
-                    chunk.Set(xx, yy, start, null);
-
-                    chunk.Set(xx, yy, start + 1, new Chunk.Tile(Resource<Texture2D>.Get("debug"), 64, 0, 32, 32) { IsPassable = true });
-                    chunk.Set(xx, yy, start + 1, new Chunk.Tile(Resource<Texture2D>.Get("debug"), 64, 0, 32, 32) { IsPassable = true });
-
-                    if (xx == (x + (width / 2)) && yy == y)
-                    {
-                        chunk.Set(xx, yy, start, new Chunk.Tile(Resource<Texture2D>.Get("debug"), 32, 0, 32, 32) { IsPassable = true, IsRamp = true, IsRampHorizontal = false, IsRampUpNegative = false, FrictionMultiplier = 0.25f});
-                        chunk.Set(xx, yy, start + 1, null);
-                        continue;
-                    }
-
-                    if (xx == (x + width - 1) && yy == (y + (height / 2)))
-                    {
-                        chunk.Set(xx, yy, start, new Chunk.Tile(Resource<Texture2D>.Get("debug"), 32, 0, 32, 32) { IsPassable = true, IsRamp = true, IsRampHorizontal = true, IsRampUpNegative = true, FrictionMultiplier = 0.25f });
-                        chunk.Set(xx, yy, start + 1, null);
-                        continue;
-                    }
-
-                    if (xx == (x + (width / 2)) && yy == (y + height - 1))
-                    {
-                        chunk.Set(xx, yy, start, new Chunk.Tile(Resource<Texture2D>.Get("debug"), 32, 0, 32, 32) { IsPassable = true, IsRamp = true, IsRampHorizontal = false, IsRampUpNegative = true, FrictionMultiplier = 0.25f });
-                        chunk.Set(xx, yy, start + 1, null);
-                        continue;
-                    }
-
-                    if (xx == x && yy == (y + (height/2)))
-                    {
-                        chunk.Set(xx, yy, start, new Chunk.Tile(Resource<Texture2D>.Get("debug"), 32, 0, 32, 32) { IsPassable = true, IsRamp = true, IsRampHorizontal = true, IsRampUpNegative = false, FrictionMultiplier = 0.25f });
-                        chunk.Set(xx, yy, start + 1, null);
-                    }
-                }
-        }
-
-        private static void CreateBridge(Chunk chunk, int x, int y, int width, int height, int start)
-        {
-            for (var xx = x; xx < (x + width); xx++)
-                for (var yy = y; yy < (y + height); yy++)
-                {
-                    chunk.Set(xx, yy, start, new Chunk.Tile(Resource<Texture2D>.Get("debug"), 64, 0, 32, 32) { IsFloater = true, IsFloaterLayered = true, IsPassable = true });
-                }
-        }
-
         private static State LoadDebugMap()
         {
             //disabled because otherwise it gets annoying to run the game while listening to music and stuff
@@ -152,17 +104,33 @@ namespace MemoryLeak
                 for (var y = 0; y < chunk.Height; y++ )
                     chunk.Set(x, y, 0, new Chunk.Tile(Resource<Texture2D>.Get("debug"), 0, 0, 32, 32) {IsPassable = true});
 
-            ElevateLand(chunk, 5, 5, 19, 19, 0);
-            ElevateLand(chunk, 7, 7, 15, 15, 1);
-            ElevateLand(chunk, 9, 9, 11, 11, 2);
-            ElevateLand(chunk, 11, 11, 7, 7, 3);
+            for (int x = 3; x < 11; x++)
+                for (int y = 7; y < 12; y++)
+                    chunk.Set(x, y, 0, null);
 
-            ElevateLand(chunk, 30, 5, 19, 19, 0);
-            ElevateLand(chunk, 32, 7, 15, 15, 1);
-            ElevateLand(chunk, 34, 9, 11, 11, 2);
-            ElevateLand(chunk, 36, 11, 7, 7, 3);
+            chunk.Set(3, 10, 2, new Chunk.Tile(Resource<Texture2D>.Get("house"), 0, 0, 32, 32) { IsFloater = true });
+            for (int x = 4; x < 10; x++) chunk.Set(x, 10, 2, new Chunk.Tile(Resource<Texture2D>.Get("house"), 8, 0, 32, 32) { IsFloater = true });
+            chunk.Set(10, 10, 2, new Chunk.Tile(Resource<Texture2D>.Get("house"), 32, 0, 32, 32) { IsFloater = true });
 
-            CreateBridge(chunk, 23, 10, 8, 5, 1);
+            chunk.Set(3, 11, 2, new Chunk.Tile(Resource<Texture2D>.Get("house"), 128, 32, 32, 32) { IsFloater = true });
+            for (int x = 4; x < 10; x++) chunk.Set(x, 11, 2, new Chunk.Tile(Resource<Texture2D>.Get("house"), 160, 32, 32, 32) { IsFloater = true });
+            chunk.Set(10, 11, 2, new Chunk.Tile(Resource<Texture2D>.Get("house"), 192, 32, 32, 32) { IsFloater = true });
+
+            for (int x = 3; x < 11; x++)
+                for (int y = 7; y < 10; y++)
+                    chunk.Set(x, y, 2, new Chunk.Tile(Resource<Texture2D>.Get("debug"), 64, 0, 32, 32) { IsFloater = true });
+
+            for (int x = 3; x < 11; x++)
+                for (int y = 7; y < 12; y++)
+                    chunk.Set(x, y, 1, new Chunk.Tile(Resource<Texture2D>.Get("debug"), 0, 0, 32, 32) {IsPassable = true});
+
+            chunk.Set(5, 11, 0, new Chunk.Tile(Resource<Texture2D>.Get("debug"), 32, 0, 32, 32) {IsPassable = true, IsRamp = true, IsRampHorizontal = false, IsRampUpNegative = true});
+            chunk.Set(5, 11, 1, null);
+            chunk.Set(5, 11, 2, null);
+
+            chunk.Set(6, 11, 0, new Chunk.Tile(Resource<Texture2D>.Get("debug"), 32, 0, 32, 32) { IsPassable = true, IsRamp = true, IsRampHorizontal = false, IsRampUpNegative = true });
+            chunk.Set(6, 11, 1, null);
+            chunk.Set(6, 11, 2, null);
 
             var player = new Physical(Resource<Texture2D>.Get("debug-entity"), 2, 2, 0);
 

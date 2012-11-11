@@ -370,14 +370,14 @@ namespace MemoryLeak.Core
         /// <param name="spriteBatch">The spritebatch to add to.</param>
         public void Draw(SpriteBatch spriteBatch)
         {
-            int playerDepth = (int) Parent.Player.Depth + 1;
+            int playerDepth = (int) Parent.Player.Depth;
             
             // Draw tiles here
             foreach(var tile in _tiles)
             {
                 if (tile == null) continue;
-                if (tile.Depth > playerDepth) continue;
-                if (tile.IsFloater && !tile.IsFloaterLayered && Math.Abs(tile.Depth - Parent.Player.Depth) < float.Epsilon) continue;
+                if (tile.Depth > playerDepth && !tile.IsFloater) continue;
+                if (tile.IsFloater && !tile.IsFloaterLayered && Math.Abs(tile.Depth - (Parent.Player.Depth + 1)) < float.Epsilon) continue;
 
                 if (tile.IsFloater && tile.Depth > Parent.Player.Depth) tile.Draw(spriteBatch, Depth);
                 else tile.Draw(spriteBatch, Depth, (byte)((Parent.Player.Depth - tile.Depth) * (255f / Depth)));
