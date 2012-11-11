@@ -52,7 +52,12 @@ namespace MemoryLeak.Core
             /// Decides if the block should disappear or not when the player is on the layer the block is.
             /// </summary>
             public bool IsFloaterLayered { get; set; }
-            
+
+            /// <summary>
+            /// Decides how much slower/faster the entity on this block should move.
+            /// </summary>
+            public float FrictionMultiplier { get; set; }
+
             /// <summary>
             /// The Chunk that this tile belongs to.
             /// </summary>
@@ -85,6 +90,7 @@ namespace MemoryLeak.Core
                 IsRampUpNegative = false;
                 IsFloater = false;
                 IsFloaterLayered = false;
+                FrictionMultiplier = 1;
             }
 
             /// <summary>

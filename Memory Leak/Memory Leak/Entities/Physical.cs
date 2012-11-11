@@ -48,6 +48,10 @@ namespace MemoryLeak.Entities
         {
             rate = Math.Abs(rate);
 
+            float sum = _parentTiles.Sum(i => i.FrictionMultiplier);
+            float average = sum/_parentTiles.Count;
+            rate *= average;
+
             _velocity = new Vector2(rate*x, rate*y);
 
             DirX = _velocity.X > 0 ? 1 : -1;

@@ -103,28 +103,28 @@ namespace MemoryLeak
 
                     if (xx == (x + (width / 2)) && yy == y)
                     {
-                        chunk.Set(xx, yy, start, new Chunk.Tile(Resource<Texture2D>.Get("debug"), 32, 0, 32, 32) { IsPassable = true, IsRamp = true, IsRampHorizontal = false, IsRampUpNegative = false });
+                        chunk.Set(xx, yy, start, new Chunk.Tile(Resource<Texture2D>.Get("debug"), 32, 0, 32, 32) { IsPassable = true, IsRamp = true, IsRampHorizontal = false, IsRampUpNegative = false, FrictionMultiplier = 0.25f});
                         chunk.Set(xx, yy, start + 1, null);
                         continue;
                     }
 
                     if (xx == (x + width - 1) && yy == (y + (height / 2)))
                     {
-                        chunk.Set(xx, yy, start, new Chunk.Tile(Resource<Texture2D>.Get("debug"), 32, 0, 32, 32) { IsPassable = true, IsRamp = true, IsRampHorizontal = true, IsRampUpNegative = true });
+                        chunk.Set(xx, yy, start, new Chunk.Tile(Resource<Texture2D>.Get("debug"), 32, 0, 32, 32) { IsPassable = true, IsRamp = true, IsRampHorizontal = true, IsRampUpNegative = true, FrictionMultiplier = 0.25f });
                         chunk.Set(xx, yy, start + 1, null);
                         continue;
                     }
 
                     if (xx == (x + (width / 2)) && yy == (y + height - 1))
                     {
-                        chunk.Set(xx, yy, start, new Chunk.Tile(Resource<Texture2D>.Get("debug"), 32, 0, 32, 32) { IsPassable = true, IsRamp = true, IsRampHorizontal = false, IsRampUpNegative = true });
+                        chunk.Set(xx, yy, start, new Chunk.Tile(Resource<Texture2D>.Get("debug"), 32, 0, 32, 32) { IsPassable = true, IsRamp = true, IsRampHorizontal = false, IsRampUpNegative = true, FrictionMultiplier = 0.25f });
                         chunk.Set(xx, yy, start + 1, null);
                         continue;
                     }
 
                     if (xx == x && yy == (y + (height/2)))
                     {
-                        chunk.Set(xx, yy, start, new Chunk.Tile(Resource<Texture2D>.Get("debug"), 32, 0, 32, 32) { IsPassable = true, IsRamp = true, IsRampHorizontal = true, IsRampUpNegative = false });
+                        chunk.Set(xx, yy, start, new Chunk.Tile(Resource<Texture2D>.Get("debug"), 32, 0, 32, 32) { IsPassable = true, IsRamp = true, IsRampHorizontal = true, IsRampUpNegative = false, FrictionMultiplier = 0.25f });
                         chunk.Set(xx, yy, start + 1, null);
                     }
                 }
