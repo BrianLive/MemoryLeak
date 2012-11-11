@@ -155,8 +155,8 @@ namespace MemoryLeak.Core
 
         public Tile Get(int x, int y, int z)
         {
-            if (x > Width - 1 || y > Height - 1 || z > Depth - 1 || x < 0 || y < 0 || z < 0) return null;
-            return _tiles[x, y, z];
+            if (x < Width && y < Height && z < Depth && x >= 0 && y >= 0 && z >= 0) return _tiles[x, y, z];
+            return null;
         }
 
         public bool PlaceFree(Physical sender, RectangleF rect, float depth)
@@ -211,25 +211,19 @@ namespace MemoryLeak.Core
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            var xSize = (int)(((Parent.Camera.Position.X - (Game.Core.Resolution.X / 2)) / (int)Tile.Width) * Parent.Camera.Zoom);
-            var ySize = (int)(((Parent.Camera.Position.Y - (Game.Core.Resolution.Y / 2)) / (int)Tile.Height) * Parent.Camera.Zoom);
+            int playerDepth = (int) Parent.Player.Depth + 1;
+            
+            // Draw tiles here
+            foreach(var tile in _tiles)
+            {
+                if (tile == null) continue;
+                if (tile.Depth > playerDepth) continue;
+                if (tile.IsFloater && !tile.IsFloaterLayered &&
+                            Math.Abs(tile.Depth - Parent.Player.Depth) < float.Epsilon) continue;
 
-            //Draw tiles here
-            for (int x = xSize; x < xSize + (Game.Core.Resolution.X / 2); x++)
-                for (int y = ySize; y < ySize + (Game.Core.Resolution.Y / 2); y++)
-                    for (int z = 0; z <= Parent.Player.Depth + 1; z++)
-                        if (x < Width && y < Height && z < Depth && x >= 0 && y >= 0 && z >= 0)
-                        {
-                            Tile tile = _tiles[x, y, z];
-
-                            if (tile != null)
-                            {
-                                if (tile.IsFloater && !tile.IsFloaterLayered && Math.Abs(tile.Depth - Parent.Player.Depth) < float.Epsilon) continue;
-
-                                if(tile.IsFloater && tile.Depth > Parent.Player.Depth) tile.Draw(spriteBatch, Depth);
-                                else tile.Draw(spriteBatch, Depth, (byte)((Parent.Player.Depth - tile.Depth) * (255 / Depth)));
-                            }
-                        }
+                if (tile.IsFloater && tile.Depth > Parent.Player.Depth) tile.Draw(spriteBatch, Depth);
+                else tile.Draw(spriteBatch, Depth, (byte)((Parent.Player.Depth - tile.Depth) * (255 / Depth)));
+            }
 
             //Draw entities here
             foreach (var i in _entities)

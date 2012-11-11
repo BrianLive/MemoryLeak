@@ -14,13 +14,16 @@ namespace MemoryLeak
             public static GraphicsDeviceManager GraphicsDeviceManager { get; internal set; }
             public static GraphicsDevice GraphicsDevice { get { return GraphicsDeviceManager.GraphicsDevice; } }
 
+            private static Vector2 _resolution = new Vector2();
+
             public static Vector2 Resolution
             {
-                get { return new Vector2(GraphicsDeviceManager.PreferredBackBufferWidth, GraphicsDeviceManager.PreferredBackBufferHeight); }
+                get { return _resolution; }
                 set
                 {
                     GraphicsDeviceManager.PreferredBackBufferWidth = (int)value.X;
                     GraphicsDeviceManager.PreferredBackBufferHeight = (int)value.Y;
+                    _resolution = new Vector2(value.X, value.Y);
                 }
             }
         }
@@ -36,9 +39,7 @@ namespace MemoryLeak
 
             _graphics = new GraphicsDeviceManager(this);
             Core.GraphicsDeviceManager = _graphics;
-
-            _graphics.PreferredBackBufferWidth = 1280;
-            _graphics.PreferredBackBufferHeight = 720;
+            Core.Resolution = new Vector2(1280, 720);
         }
 
         protected override void LoadContent()
