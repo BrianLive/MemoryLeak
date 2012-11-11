@@ -15,7 +15,7 @@ namespace MemoryLeak.Graphics
         public Vector2 Origin { get; set; }
         public Vector2 Scale { get; set; }
         public float Rotation { get; set; }
-        public int Depth { get; set; }
+        public float Depth { get; set; }
         public Color Color { get; set; }
 
         public RectangleF Rectangle
@@ -49,7 +49,7 @@ namespace MemoryLeak.Graphics
                     Origin,
                     Scale,
                     SpriteEffects.None,
-                    1 - (Depth / (float)maxDepth));
+                    1 - (Depth / maxDepth));
         }
     }
 }

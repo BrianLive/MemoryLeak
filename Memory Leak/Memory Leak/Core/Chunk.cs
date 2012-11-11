@@ -159,8 +159,9 @@ namespace MemoryLeak.Core
             return _tiles[x, y, z];
         }
 
-        public bool PlaceFree(Physical sender, RectangleF rect, int z)
+        public bool PlaceFree(Physical sender, RectangleF rect, float depth)
         {
+            int z = (int)(float)Math.Floor(depth);
             int xMax = (int) (Math.Round(rect.Right)/Tile.Width) + 1;
             int yMax = (int) (Math.Round(rect.Bottom)/Tile.Height) + 1;
 
@@ -223,7 +224,7 @@ namespace MemoryLeak.Core
 
                             if (tile != null)
                             {
-                                if (tile.IsFloater && !tile.IsFloaterLayered && tile.Depth == Parent.Player.Depth) continue;
+                                if (tile.IsFloater && !tile.IsFloaterLayered && Math.Abs(tile.Depth - Parent.Player.Depth) < float.Epsilon) continue;
 
                                 if(tile.IsFloater && tile.Depth > Parent.Player.Depth) tile.Draw(spriteBatch, Depth);
                                 else tile.Draw(spriteBatch, Depth, (byte)((Parent.Player.Depth - tile.Depth) * (255 / Depth)));
@@ -234,10 +235,9 @@ namespace MemoryLeak.Core
             foreach (var i in _entities)
             {
                 if (i.Depth > Parent.Player.Depth + 1) continue; //Don't draw entities above this layer
-
-                i.Depth++;
+                i.Depth += 0.5f;
                 i.Draw(spriteBatch, Depth, (byte)((Parent.Player.Depth - i.Depth) * (255 / Depth)));
-                i.Depth--;
+                i.Depth -= 0.5f;
             }
         }
 

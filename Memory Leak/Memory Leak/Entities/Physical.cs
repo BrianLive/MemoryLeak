@@ -31,7 +31,7 @@ namespace MemoryLeak.Entities
                 _parentTiles.Add(value);
                 var tiles = new List<Chunk.Tile>(_parentTiles);
 
-                foreach (var i in tiles.Where(i => (!Rectangle.IntersectsWith(i.Rectangle) || i.Depth != Depth)))
+                foreach (var i in tiles.Where(i => (!Rectangle.IntersectsWith(i.Rectangle) || Math.Abs(i.Depth - Depth) > float.Epsilon)))
                 {
                     _parentTiles.Remove(i);
                 }
@@ -118,7 +118,7 @@ namespace MemoryLeak.Entities
             {
                 for (var y = (int) (Math.Round(Rectangle.Y)/Chunk.Tile.Height) - 1; y < yMax; y++)
                 {
-                    var tile = Parent.Get(x, y, Depth);
+                    var tile = Parent.Get(x, y, (int)Math.Floor(Depth));
                     if (tile != null && Rectangle.IntersectsWith(tile.Rectangle))
                         if(!_parentTiles.Contains(tile)) ParentTile = tile;
                 }
