@@ -14,7 +14,7 @@ namespace MemoryLeak
             public static GraphicsDeviceManager GraphicsDeviceManager { get; internal set; }
             public static GraphicsDevice GraphicsDevice { get { return GraphicsDeviceManager.GraphicsDevice; } }
 
-            private static Vector2 _resolution = new Vector2();
+            private static Vector2 _resolution;
 
             public static Vector2 Resolution
             {
@@ -98,35 +98,34 @@ namespace MemoryLeak
                 {
                     chunk.Set(xx, yy, start, null);
 
-                    chunk.Set(xx, yy, start + 1, new Chunk.Tile(Resource<Texture2D>.Get("debug-two")) { IsPassable = true });
-                    chunk.Set(xx, yy, start + 1, new Chunk.Tile(Resource<Texture2D>.Get("debug-two")) { IsPassable = true });
+                    chunk.Set(xx, yy, start + 1, new Chunk.Tile(Resource<Texture2D>.Get("debug"), 64, 0, 32, 32) { IsPassable = true });
+                    chunk.Set(xx, yy, start + 1, new Chunk.Tile(Resource<Texture2D>.Get("debug"), 64, 0, 32, 32) { IsPassable = true });
 
                     if (xx == (x + (width / 2)) && yy == y)
                     {
-                        chunk.Set(xx, yy, start, new Chunk.Tile(Resource<Texture2D>.Get("debug-ramp")) { IsPassable = true, IsRamp = true, IsRampHorizontal = false, IsRampUpNegative = false });
+                        chunk.Set(xx, yy, start, new Chunk.Tile(Resource<Texture2D>.Get("debug"), 32, 0, 32, 32) { IsPassable = true, IsRamp = true, IsRampHorizontal = false, IsRampUpNegative = false });
                         chunk.Set(xx, yy, start + 1, null);
                         continue;
                     }
 
                     if (xx == (x + width - 1) && yy == (y + (height / 2)))
                     {
-                        chunk.Set(xx, yy, start, new Chunk.Tile(Resource<Texture2D>.Get("debug-ramp")) { IsPassable = true, IsRamp = true, IsRampHorizontal = true, IsRampUpNegative = true });
+                        chunk.Set(xx, yy, start, new Chunk.Tile(Resource<Texture2D>.Get("debug"), 32, 0, 32, 32) { IsPassable = true, IsRamp = true, IsRampHorizontal = true, IsRampUpNegative = true });
                         chunk.Set(xx, yy, start + 1, null);
                         continue;
                     }
 
                     if (xx == (x + (width / 2)) && yy == (y + height - 1))
                     {
-                        chunk.Set(xx, yy, start, new Chunk.Tile(Resource<Texture2D>.Get("debug-ramp")) { IsPassable = true, IsRamp = true, IsRampHorizontal = false, IsRampUpNegative = true });
+                        chunk.Set(xx, yy, start, new Chunk.Tile(Resource<Texture2D>.Get("debug"), 32, 0, 32, 32) { IsPassable = true, IsRamp = true, IsRampHorizontal = false, IsRampUpNegative = true });
                         chunk.Set(xx, yy, start + 1, null);
                         continue;
                     }
 
                     if (xx == x && yy == (y + (height/2)))
                     {
-                        chunk.Set(xx, yy, start, new Chunk.Tile(Resource<Texture2D>.Get("debug-ramp")) { IsPassable = true, IsRamp = true, IsRampHorizontal = true, IsRampUpNegative = false });
+                        chunk.Set(xx, yy, start, new Chunk.Tile(Resource<Texture2D>.Get("debug"), 32, 0, 32, 32) { IsPassable = true, IsRamp = true, IsRampHorizontal = true, IsRampUpNegative = false });
                         chunk.Set(xx, yy, start + 1, null);
-                        continue;
                     }
                 }
         }
@@ -136,7 +135,7 @@ namespace MemoryLeak
             for (var xx = x; xx < (x + width); xx++)
                 for (var yy = y; yy < (y + height); yy++)
                 {
-                    chunk.Set(xx, yy, start, new Chunk.Tile(Resource<Texture2D>.Get("debug-two")) {IsFloater = true, IsFloaterLayered = true, IsPassable = true});
+                    chunk.Set(xx, yy, start, new Chunk.Tile(Resource<Texture2D>.Get("debug"), 64, 0, 32, 32) { IsFloater = true, IsFloaterLayered = true, IsPassable = true });
                 }
         }
 
@@ -151,7 +150,7 @@ namespace MemoryLeak
 
             for (var x = 0; x < chunk.Width; x++)
                 for (var y = 0; y < chunk.Height; y++ )
-                    chunk.Set(x, y, 0, new Chunk.Tile(Resource<Texture2D>.Get("debug")) {IsPassable = true});
+                    chunk.Set(x, y, 0, new Chunk.Tile(Resource<Texture2D>.Get("debug"), 0, 0, 32, 32) {IsPassable = true});
 
             ElevateLand(chunk, 5, 5, 19, 19, 0);
             ElevateLand(chunk, 7, 7, 15, 15, 1);

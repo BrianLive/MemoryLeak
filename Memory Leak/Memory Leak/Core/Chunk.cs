@@ -29,8 +29,8 @@ namespace MemoryLeak.Core
 
             public event Action<Physical> Step;
 
-            public Tile(Texture2D texture)
-                : base(texture)
+            public Tile(Texture2D texture, int x = 0, int y = 0, int width = -1, int height = -1)
+                : base(texture, x, y, width, height)
             {
                 IsPassable = false;
                 IsRamp = false;
@@ -159,7 +159,7 @@ namespace MemoryLeak.Core
             return null;
         }
 
-        public bool PlaceFree(Physical sender, RectangleF rect, float depth)
+        public bool PlaceFree(Physical sender, RectangleF rect, float depth, bool secondCheck = false)
         {
             int z = (int)(float)Math.Floor(depth);
             int xMax = (int) (Math.Round(rect.Right)/Tile.Width) + 1;
@@ -171,14 +171,25 @@ namespace MemoryLeak.Core
                 {
                     var tile = Get(x, y, z);
                     var lower = Get(x, y, z - 1);
+                    var upper = Get(x, y, z + 1);
 
                     RectangleF rectangle = tile == null
                                                ? new RectangleF(x*Tile.Width, y*Tile.Height, Tile.Width, Tile.Height)
                                                : tile.Rectangle;
 
-                    if (rect.IntersectsWith(rectangle) && (lower != null && lower.IsRamp && tile == null))
+                    if (rect.IntersectsWith(rectangle) && (((lower != null && lower.IsRamp) || (upper != null && upper.IsRamp)) && tile == null))
                     {
-                        lower.OnStep(sender);
+                        if(lower != null)
+                        {
+                            if (!secondCheck && PlaceFree(sender, rect, depth - 1, true))
+                                lower.OnStep(sender);
+                        }
+                        else
+                        {
+                            if (!secondCheck && PlaceFree(sender, rect, depth + 1, true))
+                                upper.OnStep(sender);
+                        }
+
                         continue;
                     }
 
@@ -218,19 +229,18 @@ namespace MemoryLeak.Core
             {
                 if (tile == null) continue;
                 if (tile.Depth > playerDepth) continue;
-                if (tile.IsFloater && !tile.IsFloaterLayered &&
-                            Math.Abs(tile.Depth - Parent.Player.Depth) < float.Epsilon) continue;
+                if (tile.IsFloater && !tile.IsFloaterLayered && Math.Abs(tile.Depth - Parent.Player.Depth) < float.Epsilon) continue;
 
                 if (tile.IsFloater && tile.Depth > Parent.Player.Depth) tile.Draw(spriteBatch, Depth);
-                else tile.Draw(spriteBatch, Depth, (byte)((Parent.Player.Depth - tile.Depth) * (255 / Depth)));
+                else tile.Draw(spriteBatch, Depth, (byte)((Parent.Player.Depth - tile.Depth) * (255f / Depth)));
             }
 
             //Draw entities here
             foreach (var i in _entities)
             {
-                if (i.Depth > Parent.Player.Depth + 1) continue; //Don't draw entities above this layer
+                if (i.Depth > playerDepth) continue; // Don't draw entities above this layer
                 i.Depth += 0.5f;
-                i.Draw(spriteBatch, Depth, (byte)((Parent.Player.Depth - i.Depth) * (255 / Depth)));
+                i.Draw(spriteBatch, Depth, (byte)((Parent.Player.Depth - i.Depth) * (255f / Depth)));
                 i.Depth -= 0.5f;
             }
         }
