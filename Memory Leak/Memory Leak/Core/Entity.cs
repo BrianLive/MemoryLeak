@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace MemoryLeak.Core
 {
+	// TODO: make this an abstract class - Rohan
     public class Entity : Drawable
     {
         public Chunk Parent { get; set; }
@@ -21,13 +22,16 @@ namespace MemoryLeak.Core
 
         public void Kill(Entity killer)
         {
-            if (Death != null) Death(killer);
+            if (Death != null)
+				Death(killer);
+
             Parent.Remove(this);
         }
 
         public void Update(float delta)
         {
-            if (Tick != null) Tick(delta);
+            if (Tick != null)
+				Tick(delta);
         }
     }
 }
