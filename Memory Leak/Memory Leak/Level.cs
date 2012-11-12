@@ -12,7 +12,7 @@ namespace MemoryLeak
     {
         public static State Load(string fileName, Fader fader) //TODO: Actually load from file
         {
-            fader._timestep = 0.05f;
+            fader._timestep = 0.1f;
             fader.FadeIn();
             //disabled because otherwise it gets annoying to run the game while listening to music and stuff
             //Resource<Sound>.Get("austin_beatbox").IsLooped = true;
@@ -20,43 +20,6 @@ namespace MemoryLeak
 
             var chunk = new Chunk(64, 64, 5);
             var camera = new Camera();
-
-            var houseRegion = new Region(3, 7, 8, 5);
-            houseRegion.Properties.Add("isInside");
-
-            chunk.Add(houseRegion);
-
-            for (var x = 0; x < chunk.Width; x++)
-                for (var y = 0; y < chunk.Height; y++)
-                    chunk.Set(x, y, 0, new Chunk.Tile(Resource<Texture2D>.Get("debug"), 0, 0, 32, 32) { IsPassable = true });
-
-            for (int x = 3; x < 11; x++)
-                for (int y = 7; y < 12; y++)
-                    chunk.Set(x, y, 0, null);
-
-            chunk.Set(3, 10, 2, new Chunk.Tile(Resource<Texture2D>.Get("house"), 0, 0, 32, 32) { IsFloater = true });
-            for (int x = 4; x < 10; x++) chunk.Set(x, 10, 2, new Chunk.Tile(Resource<Texture2D>.Get("house"), 8, 0, 32, 32) { IsFloater = true });
-            chunk.Set(10, 10, 2, new Chunk.Tile(Resource<Texture2D>.Get("house"), 32, 0, 32, 32) { IsFloater = true });
-
-            chunk.Set(3, 11, 2, new Chunk.Tile(Resource<Texture2D>.Get("house"), 128, 32, 32, 32) { IsFloater = true });
-            for (int x = 4; x < 10; x++) chunk.Set(x, 11, 2, new Chunk.Tile(Resource<Texture2D>.Get("house"), 160, 32, 32, 32) { IsFloater = true });
-            chunk.Set(10, 11, 2, new Chunk.Tile(Resource<Texture2D>.Get("house"), 192, 32, 32, 32) { IsFloater = true });
-
-            for (int x = 3; x < 11; x++)
-                for (int y = 7; y < 10; y++)
-                    chunk.Set(x, y, 4, new Chunk.Tile(Resource<Texture2D>.Get("debug"), 64, 0, 32, 32) { IsFloater = true });
-
-            for (int x = 3; x < 11; x++)
-                for (int y = 7; y < 12; y++)
-                    chunk.Set(x, y, 1, new Chunk.Tile(Resource<Texture2D>.Get("debug"), 0, 0, 32, 32) { IsPassable = true });
-
-            chunk.Set(5, 11, 0, new Chunk.Tile(Resource<Texture2D>.Get("debug"), 32, 0, 32, 32) { IsPassable = true, IsRamp = true, IsRampHorizontal = false, IsRampUpNegative = true });
-            chunk.Set(5, 11, 1, null);
-            chunk.Set(5, 11, 2, null);
-
-            chunk.Set(6, 11, 0, new Chunk.Tile(Resource<Texture2D>.Get("debug"), 32, 0, 32, 32) { IsPassable = true, IsRamp = true, IsRampHorizontal = false, IsRampUpNegative = true });
-            chunk.Set(6, 11, 1, null);
-            chunk.Set(6, 11, 2, null);
 
             var player = new Physical(Resource<Texture2D>.Get("debug-entity"), 2, 2, 0);
 

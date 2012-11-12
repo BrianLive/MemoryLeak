@@ -23,40 +23,10 @@ namespace MemoryLeak.Core
 			/// </summary>
 			public new const float Height = 32;
 
-			/// <summary>
-			/// Decides if entities can pass through this tile.
-			/// </summary>
-			public bool IsPassable { get; set; }
-
-			/// <summary>
-			/// Decides if entities can use this tile as a ramp.
-			/// </summary>
-			public bool IsRamp { get; set; }
-
-			/// <summary>
-			/// Decides the direction of the ramp.
-			/// </summary>
-			public bool IsRampHorizontal { get; set; }
-
-			/// <summary>
-			/// Decides which direction of the ramp goes up and down.
-			/// </summary>
-			public bool IsRampUpNegative { get; set; }
-
-			/// <summary>
-			/// Decides if the tile is visible when the player is below it.
-			/// </summary>
-			public bool IsFloater { get; set; }
-
-			/// <summary>
-			/// Decides if the block should disappear or not when the player is on the layer the block is.
-			/// </summary>
-			public bool IsFloaterLayered { get; set; }
-
-			/// <summary>
-			/// Decides how much slower/faster the entity on this block should move.
-			/// </summary>
-			public float FrictionMultiplier { get; set; }
+            /// <summary>
+            /// Dictionary of properties and their values.
+            /// </summary>
+		    private readonly Dictionary<string, object> _properties = new Dictionary<string, object>();
 
 			/// <summary>
 			/// The Chunk that this tile belongs to.
@@ -84,14 +54,22 @@ namespace MemoryLeak.Core
 			public Tile(Texture2D texture, int x = 0, int y = 0, int width = -1, int height = -1)
 				: base(texture, x, y, width, height)
 			{
-				IsPassable = false;
-				IsRamp = false;
-				IsRampHorizontal = false;
-				IsRampUpNegative = false;
-				IsFloater = false;
-				IsFloaterLayered = false;
-				FrictionMultiplier = 1;
 			}
+
+            public void AddProperty(string name, string value = "")
+            {
+                _properties.Add(name, value);
+            }
+
+            /// <summary>
+            /// Checks if property exists.
+            /// </summary>
+            /// <param name="name">The name of the property.</param>
+            /// <returns>The value of the property.</returns>
+            public T HasProperty<T>(string name)
+            {
+                return (T)(_properties.ContainsKey(name) ? _properties[name] : null);
+            }
 
 			/// <summary>
 			/// Called when an entity touches a tile.
@@ -102,66 +80,70 @@ namespace MemoryLeak.Core
 			{
 				var startDepth = sender.Depth;
 
-				if (IsRamp)
+			    bool isRamp = HasProperty<bool>("IsRamp");
+
+				if (isRamp)
 				{
-					//Console.WriteLine("called it");
-					if (IsRampHorizontal)
+					switch (HasProperty<string>("RampOrientation"))
 					{
-						if (sender.DirX == 1)
-						{
-							if (IsRampUpNegative)
-							{
-								if (sender.Rectangle.Left >= Rectangle.Left)
-									sender.Depth = Depth;
-							}
-							else
-							{
-								if (sender.Rectangle.Left >= Rectangle.Left)
-									sender.Depth = Depth + 1;
-							}
-						}
-						else if (sender.DirX == -1)
-						{
-							if (IsRampUpNegative)
-							{
-								if (sender.Rectangle.Right <= Rectangle.Right)
-									sender.Depth = Depth + 1;
-							}
-							else
-							{
-								if (sender.Rectangle.Right <= Rectangle.Right)
-									sender.Depth = Depth;
-							}
-						}
-					}
-					else
-					{
-						if (sender.DirY == 1)
-						{
-							if (IsRampUpNegative)
-							{
-								if (sender.Rectangle.Top >= Rectangle.Top)
-									sender.Depth = Depth;
-							}
-							else
-							{
-								if (sender.Rectangle.Top >= Rectangle.Top)
-									sender.Depth = Depth + 1;
-							}
-						}
-						else if (sender.DirY == -1)
-						{
-							if (IsRampUpNegative)
-							{
-								if (sender.Rectangle.Bottom <= Rectangle.Bottom)
-									sender.Depth = Depth + 1;
-							}
-							else
-							{
-								if (sender.Rectangle.Bottom <= Rectangle.Bottom)
-									sender.Depth = Depth;
-							}
-						}
+					    case "Horizontal":
+					        switch (sender.DirX)
+					        {
+					            case 1:
+					                if (HasProperty<bool>("IsRampNegative"))
+					                {
+					                    if (sender.Rectangle.Left >= Rectangle.Left)
+					                        sender.Depth = Depth;
+					                }
+					                else
+					                {
+					                    if (sender.Rectangle.Left >= Rectangle.Left)
+					                        sender.Depth = Depth + 1;
+					                }
+					                break;
+					            case -1:
+					                if (HasProperty<bool>("IsRampNegative"))
+					                {
+					                    if (sender.Rectangle.Right <= Rectangle.Right)
+					                        sender.Depth = Depth + 1;
+					                }
+					                else
+					                {
+					                    if (sender.Rectangle.Right <= Rectangle.Right)
+					                        sender.Depth = Depth;
+					                }
+					                break;
+					        }
+					        break;
+					    case "Vertical":
+					        switch (sender.DirY)
+					        {
+					            case 1:
+					                if (HasProperty<bool>("IsRampNegative"))
+					                {
+					                    if (sender.Rectangle.Top >= Rectangle.Top)
+					                        sender.Depth = Depth;
+					                }
+					                else
+					                {
+					                    if (sender.Rectangle.Top >= Rectangle.Top)
+					                        sender.Depth = Depth + 1;
+					                }
+					                break;
+					            case -1:
+					                if (HasProperty<bool>("IsRampNegative"))
+					                {
+					                    if (sender.Rectangle.Bottom <= Rectangle.Bottom)
+					                        sender.Depth = Depth + 1;
+					                }
+					                else
+					                {
+					                    if (sender.Rectangle.Bottom <= Rectangle.Bottom)
+					                        sender.Depth = Depth;
+					                }
+					                break;
+					        }
+					        break;
 					}
 
 					foreach (var rectangle in Parent.GetNearbyRects(sender.Rectangle, sender.Depth))
@@ -176,7 +158,7 @@ namespace MemoryLeak.Core
 						{
 							var lower = Parent.Get(x, y, z - 1);
 
-							if ((tile != null && (tile.IsRamp || tile.IsPassable)) || (lower != null && lower.IsRamp)) continue;
+                            if ((tile != null && (tile.HasProperty<bool>("IsRamp") || tile.HasProperty<bool>("IsPassable"))) || (lower != null && lower.HasProperty<bool>("IsRamp"))) continue;
 
 							sender.Depth = startDepth;
 							break;
@@ -400,13 +382,13 @@ namespace MemoryLeak.Core
 				var tile = Get(x, y, z);
 				var lower = Get(x, y, z - 1);
 
-				if (rect.IntersectsWith(rectangle) && (lower != null && lower.IsRamp && tile == null))
+                if (rect.IntersectsWith(rectangle) && (lower != null && lower.HasProperty<bool>("IsRamp") && tile == null))
 				{
 					lower.OnStep(sender);
 					continue;
 				}
 
-				if (rect.IntersectsWith(rectangle) && ((tile != null && !tile.IsPassable) || tile == null))
+                if (rect.IntersectsWith(rectangle) && ((tile != null && !tile.HasProperty<bool>("IsPassable")) || tile == null))
 					return false;
 
 				if (tile != null)
@@ -439,11 +421,13 @@ namespace MemoryLeak.Core
 			// Draw tiles here
 			foreach (var tile in _tiles)
 			{
-				if (tile == null || (tile.Depth > playerDepth && !tile.IsFloater)) continue;
-				if (tile.IsFloater && !tile.IsFloaterLayered && Math.Abs(tile.Depth - (Parent.Player.Depth + 1)) < float.Epsilon) continue;
-				if (Parent.Player.HasProperty("isInside") && tile.Depth > playerDepth) continue;
+			    bool isInside = Parent.Player.HasProperty<bool>("IsInside");
 
-				if (tile.IsFloater && tile.Depth > Parent.Player.Depth)
+                if (tile == null || (tile.Depth > playerDepth && !tile.HasProperty<bool>("IsFloater"))) continue;
+                if (tile.HasProperty<bool>("IsFloater") && !tile.HasProperty<bool>("IsMultilayered") && Math.Abs(tile.Depth - (Parent.Player.Depth + 1)) < float.Epsilon) continue;
+				if (isInside && tile.Depth > playerDepth) continue;
+
+                if (tile.HasProperty<bool>("IsFloater") && tile.Depth > Parent.Player.Depth)
 					tile.Draw(spriteBatch, Depth);
 				else
 					tile.Draw(spriteBatch, Depth, (byte)((playerDepth - tile.Depth) * (255f / Depth)));

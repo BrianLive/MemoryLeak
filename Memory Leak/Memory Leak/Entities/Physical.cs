@@ -9,7 +9,6 @@ namespace MemoryLeak.Entities
 {
     public class Physical : Entity
     {
-        public bool DrawAbove { get; set; }
         public bool IsPassable { get; set; }
         public bool IsWalkable { get; set; }
 
@@ -43,14 +42,14 @@ namespace MemoryLeak.Entities
         public Physical(Texture2D texture, int x, int y, int z, bool isPassable = false) : base(texture, x, y, z)
         {
             IsPassable = isPassable;
-            DrawAbove = true;
+            IsWalkable = false;
         }
 
         public void Move(int x, int y, float rate)
         {
             rate = Math.Abs(rate);
 
-            float sum = _parentTiles.Sum(i => i.FrictionMultiplier);
+            float sum = _parentTiles.Sum(i => i.HasProperty<float>("FrictionMultiplier"));
             float average = sum/_parentTiles.Count;
             rate *= average;
 
@@ -138,9 +137,17 @@ namespace MemoryLeak.Entities
             if (Collision != null) Collision(sender);
         }
 
-        public bool HasProperty(string name)
+        public T HasProperty<T>(string name) where T : struct, IComparable<T>
         {
-            return _parentRegions.Any(i => i.Properties.Contains(name));
+            T ret = default(T);
+
+            foreach(var i in _parentRegions)
+            {
+                var c = i.HasProperty<T>(name);
+                if (ret.ToString() != c.ToString()) ret = c;
+            }
+
+            return ret;
         }
     }
 }
