@@ -170,7 +170,7 @@ namespace MemoryLeak
 
                 if(move != Vector2.Zero) player.Move((int)move.X, (int)move.Y, 200 * dt);
 
-                camera.Position = player.CenterPosition;
+                camera.Position = player.CenterPosition + Vector2.One / 2; //Add (0.5, 0.5) to player position so we don't get shakyness (it works trust me DON'T REMOVE IT)
             };
 
             chunk.Add(player);
