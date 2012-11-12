@@ -100,6 +100,11 @@ namespace MemoryLeak
             var chunk = new Chunk(64, 64, 5);
             var camera = new Camera();
 
+            var houseRegion = new Region(3, 7, 8, 5);
+            houseRegion.Properties.Add("isInside");
+
+            chunk.Add(houseRegion);
+
             for (var x = 0; x < chunk.Width; x++)
                 for (var y = 0; y < chunk.Height; y++ )
                     chunk.Set(x, y, 0, new Chunk.Tile(Resource<Texture2D>.Get("debug"), 0, 0, 32, 32) {IsPassable = true});
@@ -118,7 +123,7 @@ namespace MemoryLeak
 
             for (int x = 3; x < 11; x++)
                 for (int y = 7; y < 10; y++)
-                    chunk.Set(x, y, 2, new Chunk.Tile(Resource<Texture2D>.Get("debug"), 64, 0, 32, 32) { IsFloater = true });
+                    chunk.Set(x, y, 4, new Chunk.Tile(Resource<Texture2D>.Get("debug"), 64, 0, 32, 32) { IsFloater = true });
 
             for (int x = 3; x < 11; x++)
                 for (int y = 7; y < 12; y++)

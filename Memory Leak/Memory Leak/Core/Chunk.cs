@@ -189,6 +189,16 @@ namespace MemoryLeak.Core
         private readonly Tile[,,] _tiles;
 
         /// <summary>
+        /// Array of depth-based regions.
+        /// </summary>
+        private readonly List<Region>[] _regions;
+
+        /// <summary>
+        /// List of global regions (regions that apply to any depth).
+        /// </summary>
+        private readonly List<Region> _globalRegions;
+ 
+        /// <summary>
         /// List of entities contained in the chunk.
         /// </summary>
         private readonly List<Entity> _entities = new List<Entity>();
@@ -226,6 +236,8 @@ namespace MemoryLeak.Core
             Depth = depth;
 
             _tiles = new Tile[width, height, depth];
+            _regions = new List<Region>[depth];
+            _globalRegions = new List<Region>();
 
             for (var x = 0; x < width; x++)
                 for (var y = 0; y < height; y++)
@@ -252,6 +264,28 @@ namespace MemoryLeak.Core
         public void Remove(Entity entity)
         {
             _entities.Remove(entity);
+        }
+
+        /// <summary>
+        /// Adds a region to the chunk.
+        /// </summary>
+        /// <param name="region">The region to be added.</param>
+        /// <param name="z">The depth of the region (if z == -1, then add to global regions).</param>
+        public void Add(Region region, int z = -1)
+        {
+            if(z == -1) _globalRegions.Add(region);
+            else _regions[z].Add(region);
+        }
+
+        /// <summary>
+        /// Removes a region from the chunk.
+        /// </summary>
+        /// <param name="region">The region to be removed.</param>
+        /// <param name="z">The depth of the region (if z == -1, then check global regions).</param>
+        public void Remove(Region region, int z = -1)
+        {
+            if (z == -1) { if (_globalRegions.Contains(region)) _globalRegions.Remove(region); }
+            else if (_regions[z].Contains(region)) _regions[z].Remove(region);
         }
 
         /// <summary>
@@ -318,6 +352,14 @@ namespace MemoryLeak.Core
             return tiles;
         }
 
+        public List<Region> GetRegions(RectangleF rect, int depth)
+        {
+            var regions = new List<Region>();
+            if(_regions[depth] != null) regions = _regions[depth].Where(i => rect.IntersectsWith(i.Area)).ToList();
+            regions.AddRange(_globalRegions.Where(i => rect.IntersectsWith(i.Area)));
+            return regions;
+        }
+
         /// <summary>
         /// Checks whether or not a rectangle is colliding with impassible objects.
         /// </summary>
@@ -378,12 +420,13 @@ namespace MemoryLeak.Core
                 if (tile == null) continue;
                 if (tile.Depth > playerDepth && !tile.IsFloater) continue;
                 if (tile.IsFloater && !tile.IsFloaterLayered && Math.Abs(tile.Depth - (Parent.Player.Depth + 1)) < float.Epsilon) continue;
+                if (Parent.Player.HasProperty("isInside") && tile.Depth > playerDepth) continue;
 
                 if (tile.IsFloater && tile.Depth > Parent.Player.Depth) tile.Draw(spriteBatch, Depth);
-                else tile.Draw(spriteBatch, Depth, (byte)((Parent.Player.Depth - tile.Depth) * (255f / Depth)));
+                else tile.Draw(spriteBatch, Depth, (byte)((playerDepth - tile.Depth) * (255f / Depth)));
             }
 
-            //Draw entities here
+            // Draw entities here
             foreach (var i in _entities)
             {
                 if (i.Depth > playerDepth) continue; // Don't draw entities above this layer

@@ -20,7 +20,9 @@ namespace MemoryLeak.Entities
         public Vector2 Velocity { get { return _velocity; } }
 
         public event Action<Physical> Collision;
+
         private readonly List<Chunk.Tile> _parentTiles = new List<Chunk.Tile>();
+        private List<Region> _parentRegions = new List<Region>();
 
         private float _hSave, _vSave;
 
@@ -120,18 +122,25 @@ namespace MemoryLeak.Entities
 
             for (var x = (int)(Math.Round(Rectangle.X) / Chunk.Tile.Width) - 1; x < xMax; x++)
             {
-                for (var y = (int) (Math.Round(Rectangle.Y)/Chunk.Tile.Height) - 1; y < yMax; y++)
+                for (var y = (int) (Math.Round(Rectangle.Y) / Chunk.Tile.Height) - 1; y < yMax; y++)
                 {
                     var tile = Parent.Get(x, y, (int)Math.Floor(Depth));
                     if (tile != null && Rectangle.IntersectsWith(tile.Rectangle))
                         if(!_parentTiles.Contains(tile)) ParentTile = tile;
                 }
             }
+
+            _parentRegions = new List<Region>(Parent.GetRegions(Rectangle, (int) Math.Floor(Depth)));
         }
 
         public void OnCollision(Physical sender)
         {
             if (Collision != null) Collision(sender);
+        }
+
+        public bool HasProperty(string name)
+        {
+            return _parentRegions.Any(i => i.Properties.Contains(name));
         }
     }
 }
