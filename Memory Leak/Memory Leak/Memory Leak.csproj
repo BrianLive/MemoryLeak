@@ -95,6 +95,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Game.cs" />
     <Compile Include="Resource.cs" />
+    <Compile Include="Level.cs" />
     <Compile Include="Utility\RandomHelper.cs" />
     <Compile Include="Utility\Utility.cs" />
   </ItemGroup>
