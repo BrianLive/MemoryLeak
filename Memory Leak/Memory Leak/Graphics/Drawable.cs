@@ -30,14 +30,15 @@ namespace MemoryLeak.Graphics
             get { return new Vector2(Position.X + ((Width * Scale.X) / 2), Position.Y + ((Height * Scale.Y) / 2)); }
         }
 
-        public Drawable(Texture2D texture, int x = 0, int y = 0, int width = -1, int height = -1)
+        public Drawable(Texture2D texture, int x = 0, int y = 0, int? width = null, int? height = null)
         {
             Texture = texture;
             Position = Vector2.Zero;
             Origin = Vector2.Zero;
             Color = Color.White;
             Scale = Vector2.One;
-            Source = new Rectangle(x, y, (width == -1) ? Texture.Width : width, (height == -1) ? Texture.Height : height);
+
+            Source = new Rectangle(x, y, width ?? Texture.Width, height ?? Texture.Height);
         }
 
         public virtual void Draw(SpriteBatch spriteBatch, int maxDepth, byte darkness = 0)
