@@ -10,8 +10,10 @@ namespace MemoryLeak
 {
     class Level
     {
-        public static State Load(string fileName) //TODO: Actually load from file
+        public static State Load(string fileName, Fader fader) //TODO: Actually load from file
         {
+            fader._timestep = 0.05f;
+            fader.FadeIn();
             //disabled because otherwise it gets annoying to run the game while listening to music and stuff
             //Resource<Sound>.Get("austin_beatbox").IsLooped = true;
             //Resource<Sound>.Get("austin_beatbox").Play();

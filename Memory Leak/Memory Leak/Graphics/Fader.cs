@@ -12,18 +12,21 @@ namespace MemoryLeak.Graphics
         private Texture2D _WhiteTexture;
         private int _alpha;
         private float _time;
-        private float _tstep;
+        public float _timestep { get; set; }
         private int _mode;
 
         public Fader(GraphicsDevice graphicsDevice, float t_step)
             : base(graphicsDevice)
         {
+
+            // This is the big texture we use to mask the screen.
             this._WhiteTexture = new Texture2D(graphicsDevice, 1, 1);
             this._WhiteTexture.SetData(new Color[] { Color.Black });
+
             _alpha = 0;
             _time = 0f;
             _mode = 0;
-            _tstep = t_step;
+            _timestep = t_step;
         }
 
         /// <summary>
@@ -33,18 +36,18 @@ namespace MemoryLeak.Graphics
         {
             if (_mode == 1)         // ease in
             {
-                _time += _tstep;
+                _time += _timestep;
                 CubicEaseIn();
-                if (GetCubic(_time) >= 255)
+                if (GetCubic(_time) >= 255)     // if the time is just going to generate a +255 alpha then there is no point in further calcs
                 {
                     _mode = 0;
                 }
             }
             else if (_mode == 2)        // ease out
             {
-                _time += _tstep;
+                _time += _timestep;
                 CubicEaseOut();
-                if (GetCubic(_time) >= 255)
+                if (GetCubic(_time) >= 255)     // see above
                 {
                     _mode = 0;
                 }

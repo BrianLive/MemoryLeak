@@ -49,7 +49,7 @@ namespace MemoryLeak
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             _fader = new Graphics.Fader(GraphicsDevice, 0.1f);
-            CurrentState = Level.Load("level1.json");
+            CurrentState = Level.Load("level1.json", _fader);
         }
 
         protected override void UnloadContent()
