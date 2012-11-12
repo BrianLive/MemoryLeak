@@ -32,6 +32,7 @@ namespace MemoryLeak
 
         private readonly GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
+        private Graphics.Fader _fader;
 
         public State CurrentState { get; set; }
 
@@ -59,6 +60,8 @@ namespace MemoryLeak
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
                 Exit();
+
+            _fader.Update();
 
             const float maxDt = 1 / 60.0f; //Our max deltatime
             const int maxSteps = 10; //Limit the amount of times we update the game per frame
@@ -89,6 +92,10 @@ namespace MemoryLeak
             GraphicsDevice.Clear(Color.Black);
 
             CurrentState.Draw(_spriteBatch);
+
+            _fader.Begin();
+            _fader.DrawFader();
+            _fader.End();
 
             base.Draw(gameTime);
         }

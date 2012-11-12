@@ -90,6 +90,7 @@
     <Compile Include="Graphics\Drawable.cs" />
     <Compile Include="Core\Entity.cs" />
     <Compile Include="Core\State.cs" />
+    <Compile Include="Graphics\Fader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Game.cs" />
