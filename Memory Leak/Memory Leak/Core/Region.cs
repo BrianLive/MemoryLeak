@@ -1,6 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Drawing;
+using MemoryLeak.Utility;
 
 namespace MemoryLeak.Core
 {
@@ -13,7 +13,7 @@ namespace MemoryLeak.Core
         /// <summary>
         /// Dictionary of properties and their values.
         /// </summary>
-		private readonly Dictionary<string, object> _properties = new Dictionary<string, object>();
+		private readonly Dictionary<string, Property> _properties = new Dictionary<string, Property>();
 
 		public Region(int x, int y, int width, int height)
 		{
@@ -21,18 +21,14 @@ namespace MemoryLeak.Core
 								width * Chunk.Tile.Width, height * Chunk.Tile.Height);
 		}
 
-        public void AddProperty(string name, object value = null)
+        public void AddProperty(string name, object value)
         {
-            _properties.Add(name, value);
+            _properties.Add(name, new Property(value));
         }
 
-	    public T HasProperty<T>(string name) where T : struct, IComparable<T>
+	    public Property HasProperty(string name)
 	    {
-	        var o = (_properties.ContainsKey(name) ? _properties[name] : null);
-	        if (o != null)
-	            return (T) o;
-
-	        return default(T);
+            return _properties.ContainsKey(name) ? _properties[name] : Property.Empty;
 	    }
 	}
 }

@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Linq;
 using MemoryLeak.Entities;
 using MemoryLeak.Graphics;
+using MemoryLeak.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -26,7 +27,7 @@ namespace MemoryLeak.Core
             /// <summary>
             /// Dictionary of properties and their values.
             /// </summary>
-		    private readonly Dictionary<string, object> _properties = new Dictionary<string, object>();
+            private readonly Dictionary<string, Property> _properties = new Dictionary<string, Property>();
 
 			/// <summary>
 			/// The Chunk that this tile belongs to.
@@ -56,9 +57,9 @@ namespace MemoryLeak.Core
 			{
 			}
 
-            public void AddProperty(string name, string value = "")
+            public void AddProperty(string name, object value)
             {
-                _properties.Add(name, value);
+                _properties.Add(name, new Property(value));
             }
 
             /// <summary>
@@ -66,12 +67,12 @@ namespace MemoryLeak.Core
             /// </summary>
             /// <param name="name">The name of the property.</param>
             /// <returns>The value of the property.</returns>
-            public T HasProperty<T>(string name)
+            public Property HasProperty(string name)
             {
-                return (T)(_properties.ContainsKey(name) ? _properties[name] : null);
+                return _properties.ContainsKey(name) ? _properties[name] : Property.Empty;
             }
 
-			/// <summary>
+		    /// <summary>
 			/// Called when an entity touches a tile.
 			/// This method is required for ramps to work.
 			/// </summary>
@@ -80,17 +81,17 @@ namespace MemoryLeak.Core
 			{
 				var startDepth = sender.Depth;
 
-			    bool isRamp = HasProperty<bool>("IsRamp");
+			    bool isRamp = HasProperty("IsRamp").Boolean;
 
 				if (isRamp)
 				{
-					switch (HasProperty<string>("RampOrientation"))
+					switch (HasProperty("RampOrientation").String)
 					{
 					    case "Horizontal":
 					        switch (sender.DirX)
 					        {
 					            case 1:
-					                if (HasProperty<bool>("IsRampNegative"))
+					                if (HasProperty("IsRampNegative").Boolean)
 					                {
 					                    if (sender.Rectangle.Left >= Rectangle.Left)
 					                        sender.Depth = Depth;
@@ -102,7 +103,7 @@ namespace MemoryLeak.Core
 					                }
 					                break;
 					            case -1:
-					                if (HasProperty<bool>("IsRampNegative"))
+					                if (HasProperty("IsRampNegative").Boolean)
 					                {
 					                    if (sender.Rectangle.Right <= Rectangle.Right)
 					                        sender.Depth = Depth + 1;
@@ -119,7 +120,7 @@ namespace MemoryLeak.Core
 					        switch (sender.DirY)
 					        {
 					            case 1:
-					                if (HasProperty<bool>("IsRampNegative"))
+					                if (HasProperty("IsRampNegative").Boolean)
 					                {
 					                    if (sender.Rectangle.Top >= Rectangle.Top)
 					                        sender.Depth = Depth;
@@ -131,7 +132,7 @@ namespace MemoryLeak.Core
 					                }
 					                break;
 					            case -1:
-					                if (HasProperty<bool>("IsRampNegative"))
+					                if (HasProperty("IsRampNegative").Boolean)
 					                {
 					                    if (sender.Rectangle.Bottom <= Rectangle.Bottom)
 					                        sender.Depth = Depth + 1;
@@ -158,7 +159,7 @@ namespace MemoryLeak.Core
 						{
 							var lower = Parent.Get(x, y, z - 1);
 
-                            if ((tile != null && (tile.HasProperty<bool>("IsRamp") || tile.HasProperty<bool>("IsPassable"))) || (lower != null && lower.HasProperty<bool>("IsRamp"))) continue;
+                            if ((tile != null && (tile.HasProperty("IsRamp").Boolean || tile.HasProperty("IsPassable").Boolean)) || (lower != null && lower.HasProperty("IsRamp").Boolean)) continue;
 
 							sender.Depth = startDepth;
 							break;
@@ -382,13 +383,13 @@ namespace MemoryLeak.Core
 				var tile = Get(x, y, z);
 				var lower = Get(x, y, z - 1);
 
-                if (rect.IntersectsWith(rectangle) && (lower != null && lower.HasProperty<bool>("IsRamp") && tile == null))
+                if (rect.IntersectsWith(rectangle) && (lower != null && lower.HasProperty("IsRamp").Boolean && tile == null))
 				{
 					lower.OnStep(sender);
 					continue;
 				}
 
-                if (rect.IntersectsWith(rectangle) && ((tile != null && !tile.HasProperty<bool>("IsPassable")) || tile == null))
+                if (rect.IntersectsWith(rectangle) && ((tile != null && !tile.HasProperty("IsPassable").Boolean) || tile == null))
 					return false;
 
 				if (tile != null)
@@ -421,13 +422,11 @@ namespace MemoryLeak.Core
 			// Draw tiles here
 			foreach (var tile in _tiles)
 			{
-			    bool isInside = Parent.Player.HasProperty<bool>("IsInside");
+                if (tile == null || (tile.Depth > playerDepth && !tile.HasProperty("IsFloater").Boolean)) continue;
+                if (tile.HasProperty("IsFloater").Boolean && !tile.HasProperty("IsMultilayered").Boolean && Math.Abs(tile.Depth - (Parent.Player.Depth + 1)) < float.Epsilon) continue;
+				if (Parent.Player.HasProperty("IsInside").Boolean && tile.Depth > playerDepth) continue;
 
-                if (tile == null || (tile.Depth > playerDepth && !tile.HasProperty<bool>("IsFloater"))) continue;
-                if (tile.HasProperty<bool>("IsFloater") && !tile.HasProperty<bool>("IsMultilayered") && Math.Abs(tile.Depth - (Parent.Player.Depth + 1)) < float.Epsilon) continue;
-				if (isInside && tile.Depth > playerDepth) continue;
-
-                if (tile.HasProperty<bool>("IsFloater") && tile.Depth > Parent.Player.Depth)
+                if (tile.HasProperty("IsFloater").Boolean && tile.Depth > Parent.Player.Depth)
 					tile.Draw(spriteBatch, Depth);
 				else
 					tile.Draw(spriteBatch, Depth, (byte)((playerDepth - tile.Depth) * (255f / Depth)));

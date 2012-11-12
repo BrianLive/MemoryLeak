@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using MemoryLeak.Core;
+using MemoryLeak.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -49,7 +50,7 @@ namespace MemoryLeak.Entities
         {
             rate = Math.Abs(rate);
 
-            float sum = _parentTiles.Sum(i => i.HasProperty<float>("FrictionMultiplier"));
+            float sum = _parentTiles.Sum(i => i.HasProperty("FrictionMultiplier").Float);
             float average = sum/_parentTiles.Count;
             rate *= average;
 
@@ -137,14 +138,14 @@ namespace MemoryLeak.Entities
             if (Collision != null) Collision(sender);
         }
 
-        public T HasProperty<T>(string name) where T : struct, IComparable<T>
+        public Property HasProperty(string name)
         {
-            T ret = default(T);
+            Property ret = Property.Empty;
 
             foreach(var i in _parentRegions)
             {
-                var c = i.HasProperty<T>(name);
-                if (ret.ToString() != c.ToString()) ret = c;
+                var temp = i.HasProperty(name);
+                ret = temp != Property.Empty ? temp : ret;
             }
 
             return ret;

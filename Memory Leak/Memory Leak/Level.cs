@@ -12,7 +12,7 @@ namespace MemoryLeak
     {
         public static State Load(string fileName, Fader fader) //TODO: Actually load from file
         {
-            fader._timestep = 0.1f;
+            fader.Timestep = 0.1f;
             fader.FadeIn();
             //disabled because otherwise it gets annoying to run the game while listening to music and stuff
             //Resource<Sound>.Get("austin_beatbox").IsLooped = true;
@@ -20,6 +20,15 @@ namespace MemoryLeak
 
             var chunk = new Chunk(64, 64, 5);
             var camera = new Camera();
+
+            for(int x = 0; x < 32; x++)
+                for(int y = 0; y < 32; y++)
+                {
+                    var tile = new Chunk.Tile(Resource<Texture2D>.Get("debug"), 0, 0, 32, 32);
+                    tile.AddProperty("IsPassable", true);
+                    tile.AddProperty("FrictionMultiplier", 1);
+                    chunk.Set(x, y, 0, tile);
+                }
 
             var player = new Physical(Resource<Texture2D>.Get("debug-entity"), 2, 2, 0);
 

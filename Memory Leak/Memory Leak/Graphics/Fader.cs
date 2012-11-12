@@ -1,32 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace MemoryLeak.Graphics
 {
     class Fader : SpriteBatch
     {
-        private Texture2D _WhiteTexture;
+        private readonly Texture2D _whiteTexture;
         private int _alpha;
         private float _time;
-        public float _timestep { get; set; }
+        public float Timestep { get; set; }
         private int _mode;
 
-        public Fader(GraphicsDevice graphicsDevice, float t_step)
+        public Fader(GraphicsDevice graphicsDevice, float tStep)
             : base(graphicsDevice)
         {
 
             // This is the big texture we use to mask the screen.
-            this._WhiteTexture = new Texture2D(graphicsDevice, 1, 1);
-            this._WhiteTexture.SetData(new Color[] { Color.Black });
+            _whiteTexture = new Texture2D(graphicsDevice, 1, 1);
+            _whiteTexture.SetData(new[] { Color.Black });
 
             _alpha = 0;
             _time = 0f;
             _mode = 0;
-            _timestep = t_step;
+            Timestep = tStep;
         }
 
         /// <summary>
@@ -36,7 +32,7 @@ namespace MemoryLeak.Graphics
         {
             if (_mode == 1)         // ease in
             {
-                _time += _timestep;
+                _time += Timestep;
                 CubicEaseIn();
                 if (GetCubic(_time) >= 255)     // if the time is just going to generate a +255 alpha then there is no point in further calcs
                 {
@@ -45,7 +41,7 @@ namespace MemoryLeak.Graphics
             }
             else if (_mode == 2)        // ease out
             {
-                _time += _timestep;
+                _time += Timestep;
                 CubicEaseOut();
                 if (GetCubic(_time) >= 255)     // see above
                 {
@@ -83,7 +79,7 @@ namespace MemoryLeak.Graphics
         {
             Color col = Color.Black;
             col.A = (byte)_alpha;
-            this.Draw(this._WhiteTexture, new Rectangle(0, 0, MemoryLeak.Game.Core.GraphicsDevice.Viewport.Width, MemoryLeak.Game.Core.GraphicsDevice.Viewport.Height), col);
+            Draw(_whiteTexture, new Rectangle(0, 0, Game.Core.GraphicsDevice.Viewport.Width, Game.Core.GraphicsDevice.Viewport.Height), col);
         }
 
         private float GetCubic(float t)

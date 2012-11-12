@@ -1,8 +1,6 @@
 using System;
 using MemoryLeak.Core;
-using MemoryLeak.Entities;
 using MemoryLeak.Graphics;
-using MemoryLeak.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -32,7 +30,7 @@ namespace MemoryLeak
 
         private readonly GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
-        private Graphics.Fader _fader;
+        private Fader _fader;
 
         public State CurrentState { get; set; }
 
@@ -48,7 +46,7 @@ namespace MemoryLeak
         protected override void LoadContent()
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
-            _fader = new Graphics.Fader(GraphicsDevice, 0.1f);
+            _fader = new Fader(GraphicsDevice, 0.1f);
             CurrentState = Level.Load("level1.json", _fader);
         }
 
