@@ -47,7 +47,7 @@ namespace MemoryLeak.Graphics
 			{
 				if (_isDirty)
 				{
-				    Matrix position = Matrix.CreateTranslation(-_position.X, -_position.Y, 0);
+				    Matrix position = Matrix.CreateTranslation((float)Math.Round(-_position.X), (float)Math.Round(-_position.Y), 0);
 				    Matrix rotation = Matrix.CreateRotationZ(_rotation);
 				    Matrix scale = Matrix.CreateScale(Zoom, Zoom, 1);
 				    Matrix center = Matrix.CreateTranslation(Game.Core.Resolution.X / 2, Game.Core.Resolution.Y / 2, 0);

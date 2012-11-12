@@ -170,7 +170,7 @@ namespace MemoryLeak
 
                 if(move != Vector2.Zero) player.Move((int)move.X, (int)move.Y, 200 * dt);
 
-                camera.Position = player.Position;
+                camera.Position = player.CenterPosition;
             };
 
             chunk.Add(player);
