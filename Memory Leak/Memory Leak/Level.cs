@@ -1,4 +1,5 @@
 ﻿using System;
+using MemoryLeak.Audio;
 using MemoryLeak.Core;
 using MemoryLeak.Entities;
 using MemoryLeak.Graphics;
@@ -14,11 +15,12 @@ namespace MemoryLeak
         {
             fader.Timestep = 0.1f;
             fader.FadeIn();
-            //disabled because otherwise it gets annoying to run the game while listening to music and stuff
-            //Resource<Sound>.Get("austin_beatbox").IsLooped = true;
-            //Resource<Sound>.Get("austin_beatbox").Play();
 
-            var chunk = new Chunk(64, 64, 5);
+            //disabled because otherwise it gets annoying to run the game while listening to music and stuff
+            Resource<Sound>.Get("austin_beatbox").IsLooped = true;
+            Resource<Sound>.Get("austin_beatbox").Play();
+
+            var chunk = new Chunk(32, 32);
             var camera = new Camera();
 
             for(int x = 0; x < 32; x++)
@@ -31,6 +33,9 @@ namespace MemoryLeak
                 }
 
             var player = new Physical(Resource<Texture2D>.Get("debug-entity"), 2, 2, 0);
+            var otherDude = new Physical(Resource<Texture2D>.Get("debug-entity"), 3, 3, 0);
+            otherDude.Tick += f => otherDude.Move(1, 0, 100*f);
+            chunk.Add(otherDude);
 
             player.Tick += dt =>
             {

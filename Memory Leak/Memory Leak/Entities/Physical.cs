@@ -16,6 +16,17 @@ namespace MemoryLeak.Entities
         public int DirX { get; private set; }
         public int DirY { get; private set; }
 
+        public override Chunk Parent
+        {
+            get { return base.Parent; }
+            
+            set
+            {
+                base.Parent = value;
+                CorrectParent();
+            }
+        }
+
         private Vector2 _velocity = Vector2.Zero;
         public Vector2 Velocity { get { return _velocity; } }
 
@@ -31,11 +42,13 @@ namespace MemoryLeak.Entities
             set
             {
                 _parentTiles.Add(value);
+                value.Children.Add(this);
                 var tiles = new List<Chunk.Tile>(_parentTiles);
 
                 foreach (var i in tiles.Where(i => (!Rectangle.IntersectsWith(i.Rectangle) || Math.Abs(i.Depth - Depth) > float.Epsilon)))
                 {
                     _parentTiles.Remove(i);
+                    i.Children.Remove(this);
                 }
             }
         }
@@ -140,15 +153,7 @@ namespace MemoryLeak.Entities
 
         public Property HasProperty(string name)
         {
-            Property ret = Property.Empty;
-
-            foreach(var i in _parentRegions)
-            {
-                var temp = i.HasProperty(name);
-                ret = temp != Property.Empty ? temp : ret;
-            }
-
-            return ret;
+            return _parentRegions.Select(i => i.HasProperty(name)).Aggregate(Property.Empty, (current, temp) => temp != Property.Empty ? temp : current);
         }
     }
 }

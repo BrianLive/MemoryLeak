@@ -247,10 +247,6 @@ namespace MemoryLeak.Core
 		{
 			entity.Parent = this;
 			_entities.Add(entity);
-
-			var physical = entity as Physical;
-			if (physical != null)
-				physical.CorrectParent();
 		}
 
 		/// <summary>
@@ -260,6 +256,7 @@ namespace MemoryLeak.Core
 		public void Remove(Entity entity)
 		{
 			_entities.Remove(entity);
+		    entity.Parent = null;
 		}
 
 		/// <summary>
@@ -436,9 +433,9 @@ namespace MemoryLeak.Core
 			foreach (var i in _entities)
 			{
 				if (i.Depth > playerDepth) continue; // Don't draw entities above this layer
-				i.Depth += 0.5f;
-				i.Draw(spriteBatch, Depth, (byte)((Parent.Player.Depth - i.Depth) * (255f / Depth)));
-				i.Depth -= 0.5f;
+			    i.Depth += 0.1f;
+				i.Draw(spriteBatch, Depth, (byte)(((playerDepth + 0.1f) - i.Depth) * (255f / Depth)));
+			    i.Depth -= 0.1f;
 			}
 		}
 

@@ -8,7 +8,7 @@ namespace MemoryLeak.Core
 	// TODO: make this an abstract class - Rohan
     public class Entity : Drawable
     {
-        public Chunk Parent { get; set; }
+        public virtual Chunk Parent { get; set; }
 
         public event Action<Drawable> Death;
         public event Action<float> Tick;
