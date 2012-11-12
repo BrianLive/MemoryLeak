@@ -1,4 +1,5 @@
 ﻿using MemoryLeak.Entities;
+using MemoryLeak.Graphics;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace MemoryLeak.Core

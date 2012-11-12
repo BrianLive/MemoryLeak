@@ -1,6 +1,7 @@
 using System;
 using MemoryLeak.Core;
 using MemoryLeak.Entities;
+using MemoryLeak.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;

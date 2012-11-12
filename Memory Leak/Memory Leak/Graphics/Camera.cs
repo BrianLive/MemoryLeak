@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.Xna.Framework;
 
-namespace MemoryLeak.Core
+namespace MemoryLeak.Graphics
 {
 	public class Camera
 	{
@@ -36,7 +36,7 @@ namespace MemoryLeak.Core
 			get { return _zoom; }
 			set
 			{
-				_zoom = (_zoom < 0.1f ? 0.1f : value);
+			    _zoom = Math.Max(value, 0.1f);
 				_isDirty = true;
 			}
 		}
@@ -47,9 +47,12 @@ namespace MemoryLeak.Core
 			{
 				if (_isDirty)
 				{
-                    _matrix = Matrix.CreateTranslation(new Vector3(-(float)Math.Round(_position.X), -(float)Math.Round(_position.Y), 0)) *
-							  Matrix.CreateRotationZ(_rotation) * Matrix.CreateScale(new Vector3(Zoom, Zoom, 1)) *
-							  Matrix.CreateTranslation(new Vector3((float)Math.Round(Game.Core.Resolution.X * 0.5f), (float)Math.Round(Game.Core.Resolution.Y * 0.5f), 0));
+				    Matrix position = Matrix.CreateTranslation(-_position.X, -_position.Y, 0);
+				    Matrix rotation = Matrix.CreateRotationZ(_rotation);
+				    Matrix scale = Matrix.CreateScale(Zoom, Zoom, 1);
+				    Matrix center = Matrix.CreateTranslation(Game.Core.Resolution.X / 2, Game.Core.Resolution.Y / 2, 0);
+
+				    _matrix = position * rotation * scale * center;
 				}
 
 				return _matrix;
