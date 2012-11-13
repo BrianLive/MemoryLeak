@@ -17,8 +17,8 @@ namespace MemoryLeak
             fader.FadeIn();
 
             //disabled because otherwise it gets annoying to run the game while listening to music and stuff
-            Resource<Sound>.Get("austin_beatbox").IsLooped = true;
-            Resource<Sound>.Get("austin_beatbox").Play();
+            Resource<Sound>.Get("BGM/HonorForAll").IsLooped = true;
+            Resource<Sound>.Get("BGM/HonorForAll").Play();
 
             var chunk = new Chunk(32, 32);
             var camera = new Camera();
