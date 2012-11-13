@@ -16,12 +16,25 @@ namespace MemoryLeak.Audio
 
         private Sound(Stream stream)
         {
-            WaveStream waveStream = new WaveFileReader(stream);
+            var streamCheck = stream as FileStream;
+
+	        WaveStream waveStream;
+
+            if(streamCheck != null && streamCheck.Name.EndsWith(".mp3"))
+	            waveStream = CreateInputStream(stream);
+            else waveStream = new WaveFileReader(stream);
 
             _loop = new LoopStream(waveStream);
             _waveOut.Init(_loop);
-
+            
             IsLooped = false;
+        }
+
+        private WaveStream CreateInputStream(Stream stream)
+        {
+	        WaveStream mp3Reader = new Mp3FileReader(stream);
+			WaveChannel32 inputStream = new WaveChannel32(mp3Reader);
+	        return inputStream;
         }
 
         public void Play()
@@ -42,8 +55,6 @@ namespace MemoryLeak.Audio
             return new Sound(stream);
         }
     }
-
-    ////////////// Everything down here ripped from http://mark-dot-net.blogspot.nl/2009/10/looped-playback-in-net-with-naudio.html //////////////
 
     /// <summary>
     /// Stream for looping playback

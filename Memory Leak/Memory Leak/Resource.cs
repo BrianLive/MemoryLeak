@@ -17,7 +17,7 @@ namespace MemoryLeak
 	{
 		private static readonly Dictionary<string, T> Resources = new Dictionary<string, T>();
 
-		public static T Get(string name)
+		public static T Get(string name, string extension = "")
 		{
 			switch (typeof(T).Name)
 			{
@@ -26,7 +26,7 @@ namespace MemoryLeak
 
 					if (!Resources.ContainsKey(name))
 					{
-						var stream = new FileStream(ResourceDirectory.Base + ResourceDirectory.Textures + name + ".png", FileMode.Open);
+                        var stream = new FileStream(ResourceDirectory.Base + ResourceDirectory.Textures + name + "." + (extension != "" ? extension : "png"), FileMode.Open);
 						Resources.Add(name, Texture2D.FromStream(Game.Core.GraphicsDevice, stream) as T);
 					}
 					break;
@@ -36,7 +36,7 @@ namespace MemoryLeak
 
 					if (!Resources.ContainsKey(name))
 					{
-						var stream = new FileStream(ResourceDirectory.Base + ResourceDirectory.SoundEffects + name + ".wav", FileMode.Open);
+						var stream = new FileStream(ResourceDirectory.Base + ResourceDirectory.SoundEffects + name + "." + (extension != "" ? extension : "wav"), FileMode.Open);
 						Resources.Add(name, Sound.FromStream(stream) as T);
 					}
 					break;
