@@ -30,7 +30,7 @@ namespace MemoryLeak.Audio
             IsLooped = false;
         }
 
-		private ~Sound()
+		~Sound()
 		{
 			if(_waveOut != null)
 			{
