@@ -5,8 +5,8 @@ namespace MemoryLeak.Audio
 {
     internal class Sound
     {
-        private readonly WaveOutEvent _waveOut = new WaveOutEvent();
-        private readonly LoopStream _loop;
+        private WaveOutEvent _waveOut = new WaveOutEvent();
+        private LoopStream _loop;
 
         public bool IsLooped
         {
@@ -29,6 +29,21 @@ namespace MemoryLeak.Audio
             
             IsLooped = false;
         }
+
+		private ~Sound()
+		{
+			if(_waveOut != null)
+			{
+				_waveOut.Stop();
+				_waveOut = null;
+			}
+
+			if(_loop != null)
+			{
+				_loop.Close();
+				_loop = null;
+			} 
+		}
 
         private WaveStream CreateInputStream(Stream stream)
         {
