@@ -33,7 +33,7 @@ namespace MemoryLeak.Graphics
             if (_mode == 1)         // ease in
             {
                 _time += Timestep;
-                CubicEaseIn();
+                EaseIn();
                 if (GetCubic(_time) >= 255)     // if the time is just going to generate a +255 alpha then there is no point in further calcs
                 {
                     _mode = 0;
@@ -42,7 +42,7 @@ namespace MemoryLeak.Graphics
             else if (_mode == 2)        // ease out
             {
                 _time += Timestep;
-                CubicEaseOut();
+                EaseOut();
                 if (GetCubic(_time) >= 255)     // see above
                 {
                     _mode = 0;
@@ -87,10 +87,15 @@ namespace MemoryLeak.Graphics
             return MathHelper.Clamp(t * t * t, 0, 255);
         }
 
+        private float GetQuad(float t)
+        {
+            return MathHelper.Clamp(t * t, 0, 255);
+        }
+
         /// <summary>
         /// changes the alpha value of the mask using the current time frame.
         /// </summary>
-        private void CubicEaseOut()
+        private void EaseOut()
         {
             _alpha = (byte)GetCubic(_time);
         }
@@ -98,7 +103,7 @@ namespace MemoryLeak.Graphics
         /// <summary>
         /// Changes the alpha value of the mash using the current time frame - 255 to inverse it.
         /// </summary>
-        private void CubicEaseIn()
+        private void EaseIn()
         {
             _alpha = 255 - (byte)GetCubic(_time);
         }
