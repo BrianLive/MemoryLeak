@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IO;
+using System.Xml.Linq;
 using MemoryLeak.Audio;
 using MemoryLeak.Core;
 using MemoryLeak.Entities;
@@ -11,6 +13,35 @@ namespace MemoryLeak
 {
     class Level
     {
+        private class LoadedLevel
+        {
+            public readonly XDocument Root;
+
+            public LoadedLevel(FileStream fs)
+            {
+                Root = XDocument.Load(fs);
+            }
+
+            public XElement Map
+            {
+                get { return Root.Element("map"); }
+            }
+
+            public XElement Tileset
+            {
+                get { return Map.Element("tileset"); }
+            }
+
+            public int Width
+            {
+                get { return int.Parse(Map.Attribute("width").Value); }
+            }
+
+            public int Height
+            {
+                get { return int.Parse(Map.Attribute("height").Value); }
+            }
+        }
         public static State Load(string fileName, Fader fader) //TODO: Actually load from file
         {
             fader.Timestep = 0.1f;
@@ -20,13 +51,24 @@ namespace MemoryLeak
             //Resource<Sound>.Get("BGM/HonorForAll", "mp3").IsLooped = true;
             //Resource<Sound>.Get("BGM/HonorForAll", "mp3").Play();
 
-            var chunk = new Chunk(32, 32);
+            string file = Path.Combine("Content/Maps/", fileName);
+            var level = new LoadedLevel(new FileStream(file, FileMode.Open));
+
+            var chunk = new Chunk(level.Width, level.Height);
             var camera = new Camera();
 
-            for(int x = 0; x < 32; x++)
-                for(int y = 0; y < 32; y++)
+            for (int x = 0; x < chunk.Width; x++)
+                for (int y = 0; y < chunk.Height; y++)
                 {
-                    var tile = new Chunk.Tile(Resource<Texture2D>.Get("debug"), 0, 0, 32, 32);
+                    //int xSource = id % (_texture.Width / Map.TileWidth);
+                    //int ySource = id / (_texture.Width / Map.TileWidth);
+
+                    int tx = 0;
+                    int ty = 0;
+                    int tw = 64;
+                    int th = 64;
+
+                    var tile = new Chunk.Tile(Resource<Texture2D>.Get("debug"), tx, ty, tw, th);
                     tile.AddProperty("IsPassable", true);
                     tile.AddProperty("FrictionMultiplier", 1);
                     chunk.Set(x, y, 0, tile);
@@ -45,37 +87,37 @@ namespace MemoryLeak
             chunk.Add(otherDude);
 
             player.Tick += dt =>
-            {
-                var k = Keyboard.GetState();
-
-                var move = Vector2.Zero;
-
-                foreach (var i in k.GetPressedKeys())
                 {
-                    switch (i)
+                    var k = Keyboard.GetState();
+
+                    var move = Vector2.Zero;
+
+                    foreach (var i in k.GetPressedKeys())
                     {
-                        case Keys.W:
-                            move.Y = -1;
-                            break;
-                        case Keys.S:
-                            move.Y = 1;
-                            break;
-                        case Keys.A:
-                            move.X = -1;
-                            break;
-                        case Keys.D:
-                            move.X = 1;
-                            break;
-                        case Keys.LeftShift:
-                            Console.WriteLine(player.Depth);
-                            break;
+                        switch (i)
+                        {
+                            case Keys.W:
+                                move.Y = -1;
+                                break;
+                            case Keys.S:
+                                move.Y = 1;
+                                break;
+                            case Keys.A:
+                                move.X = -1;
+                                break;
+                            case Keys.D:
+                                move.X = 1;
+                                break;
+                            case Keys.LeftShift:
+                                Console.WriteLine(player.Depth);
+                                break;
+                        }
                     }
-                }
 
-                if (move != Vector2.Zero) player.Move((int)move.X, (int)move.Y, 200 * dt);
+                    if (move != Vector2.Zero) player.Move((int)move.X, (int)move.Y, 200 * dt);
 
-                camera.Position = player.CenterPosition + Vector2.One / 2; //Add (0.5, 0.5) to player position so we don't get shakyness (it works trust me DON'T REMOVE IT)
-            };
+                    camera.Position = player.CenterPosition + Vector2.One / 2; //Add (0.5, 0.5) to player position so we don't get shakyness (it works trust me DON'T REMOVE IT)
+                };
 
             chunk.Add(player);
 
