@@ -47,7 +47,7 @@ namespace MemoryLeak
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             _fader = new Fader(GraphicsDevice, 0.1f);
-            CurrentState = Level.Load("debug.tmx", _fader); //RIP json
+            CurrentState = Level.Load("debug_gzip.tmx", _fader); //RIP json
         }
 
         protected override void UnloadContent()

@@ -1,5 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
+using System.Linq;
+using System.Text;
 using System.Xml.Linq;
 using MemoryLeak.Audio;
 using MemoryLeak.Core;
@@ -32,6 +36,62 @@ namespace MemoryLeak
                 get { return Map.Element("tileset"); }
             }
 
+            public dynamic Image
+            {
+                get
+                {
+                    var img = Tileset.Element("image");
+                    return new
+                        {
+                            Source = Path.GetFileNameWithoutExtension(img.Attribute("source").Value),
+                            Width = int.Parse(img.Attribute("width").Value),
+                            Height = int.Parse(img.Attribute("height").Value)
+                        };
+                }
+            }
+
+            public Dictionary<string, dynamic> Layers
+            {
+                get
+                {
+                    Dictionary<string, dynamic> result = new Dictionary<string, dynamic>();
+                    var layers =  Map.Elements("layer").ToList();
+
+                    foreach (var layer in layers)
+                    {
+                        var id = layer.Attribute("name").Value;
+
+                        //TODO: Decompress stuff.
+
+                        var indecipherableMess = layer.Element("data").Value;
+                        var bytes = Convert.FromBase64String(indecipherableMess);
+                        
+                        var resultStream = new MemoryStream();
+
+                        using (Stream zipStream = new GZipStream(new MemoryStream(bytes), CompressionMode.Decompress))
+                        {
+                            byte[] buffer = new byte[1024];
+                            int nRead;
+
+                            while ((nRead = zipStream.Read(buffer, 0, buffer.Length)) > 0)
+                                resultStream.Write(buffer, 0, nRead);
+                        }
+
+                        var byteTiles = resultStream.ToArray();
+                        var intTiles = new int[byteTiles.Length / 4];
+
+                        for (int i = 0; i < byteTiles.Length; i += 4)
+                            intTiles[i / 4] = BitConverter.ToInt32(byteTiles, i);
+
+                        resultStream.Dispose();
+
+                        result[id] = new { Tiles = intTiles };
+                    }
+
+                    return result;
+                }
+            }
+
             public int Width
             {
                 get { return int.Parse(Map.Attribute("width").Value); }
@@ -57,24 +117,31 @@ namespace MemoryLeak
             var chunk = new Chunk(level.Width, level.Height);
             var camera = new Camera();
 
+            int[] tiles = level.Layers["1"].Tiles;
+
             for (int x = 0; x < chunk.Width; x++)
                 for (int y = 0; y < chunk.Height; y++)
                 {
-                    //int xSource = id % (_texture.Width / Map.TileWidth);
-                    //int ySource = id / (_texture.Width / Map.TileWidth);
+                    Texture2D tex = Resource<Texture2D>.Get(level.Image.Source);
+
+                    int id = tiles[x + y * chunk.Width];
+                    //TODO: Read from the tiles array and set tx/ty/tw/th from tileset
 
                     int tx = 0;
                     int ty = 0;
-                    int tw = 64;
-                    int th = 64;
+                    int tw = 32;
+                    int th = 32;
 
-                    var tile = new Chunk.Tile(Resource<Texture2D>.Get("debug"), tx, ty, tw, th);
-                    tile.AddProperty("IsPassable", true);
-                    tile.AddProperty("FrictionMultiplier", 1);
-                    chunk.Set(x, y, 0, tile);
+                    if (id == 3)
+                    {
+                        var tile = new Chunk.Tile(tex, tx, ty, tw, th);
+                        tile.AddProperty("IsPassable", true);
+                        tile.AddProperty("FrictionMultiplier", 1);
+                        chunk.Set(x, y, 0, tile);
+                    }
                 }
 
-            var player = new Physical(Resource<Texture2D>.Get("debug-entity"), 2, 2, 0);
+            var player = new Physical(Resource<Texture2D>.Get("debug-entity"), 1, 1, 0);
             var otherDude = new Physical(Resource<Texture2D>.Get("debug-entity"), 6, 6, 0);
 
             float time = 0;
