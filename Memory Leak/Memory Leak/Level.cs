@@ -17,8 +17,8 @@ namespace MemoryLeak
             fader.FadeIn();
 
             //disabled because otherwise it gets annoying to run the game while listening to music and stuff
-            Resource<Sound>.Get("BGM/HonorForAll", "mp3").IsLooped = true;
-            Resource<Sound>.Get("BGM/HonorForAll", "mp3").Play();
+            //Resource<Sound>.Get("BGM/HonorForAll", "mp3").IsLooped = true;
+            //Resource<Sound>.Get("BGM/HonorForAll", "mp3").Play();
 
             var chunk = new Chunk(32, 32);
             var camera = new Camera();
@@ -33,8 +33,15 @@ namespace MemoryLeak
                 }
 
             var player = new Physical(Resource<Texture2D>.Get("debug-entity"), 2, 2, 0);
-            var otherDude = new Physical(Resource<Texture2D>.Get("debug-entity"), 3, 3, 0);
-            otherDude.Tick += f => otherDude.Move(1, 0, 100*f);
+            var otherDude = new Physical(Resource<Texture2D>.Get("debug-entity"), 6, 6, 0);
+
+            float time = 0;
+            otherDude.Tick += f =>
+                {
+                    time += f * 0.25f;
+                    otherDude.Move((int)Math.Round(Math.Cos(time * Math.PI * 2)), (int)Math.Round(Math.Sin(time * Math.PI * 2)), 100 * f);
+                };
+
             chunk.Add(otherDude);
 
             player.Tick += dt =>
