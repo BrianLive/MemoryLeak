@@ -169,16 +169,20 @@ namespace MemoryLeak
             }
 
             var player = new Physical(Resource<Texture2D>.Get("debug-entity"), 3, 3, 0);
-            var otherDude = new Physical(Resource<Texture2D>.Get("debug-entity"), 6, 6, 0);
 
-            float time = 0;
-            otherDude.Tick += f =>
-                {
-                    time += f * 0.25f;
-                    otherDude.Move((int)Math.Round(Math.Cos(time * Math.PI * 2)), (int)Math.Round(Math.Sin(time * Math.PI * 2)), 100 * f);
-                };
+            for (int i = 0; i < 10; i++) //LOOK AT ALL THOSE DUDES HAVING FUN
+            {
+                var otherDude = new Physical(Resource<Texture2D>.Get("debug-entity"), RandomHelper.Range(3, 16-3), RandomHelper.Range(3, 16-3), 0);
 
-            chunk.Add(otherDude);
+                float time = RandomHelper.Range();
+                otherDude.Tick += f =>
+                    {
+                        time += f * 0.25f;
+                        otherDude.Move((int)Math.Round(Math.Cos(time * Math.PI * 2)), (int)Math.Round(Math.Sin(time * Math.PI * 2)), 100 * f);
+                    };
+
+                chunk.Add(otherDude);
+            }
 
             player.Tick += dt =>
                 {
