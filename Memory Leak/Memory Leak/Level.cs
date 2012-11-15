@@ -9,6 +9,7 @@ using MemoryLeak.Audio;
 using MemoryLeak.Core;
 using MemoryLeak.Entities;
 using MemoryLeak.Graphics;
+using MemoryLeak.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -31,22 +32,40 @@ namespace MemoryLeak
                 get { return Root.Element("map"); }
             }
 
-            public XElement Tileset
-            {
-                get { return Map.Element("tileset"); }
-            }
-
-            public dynamic Image
+            public dynamic Tileset
             {
                 get
                 {
-                    var img = Tileset.Element("image");
-                    return new
+                    var tileset = Map.Element("tileset");
+                    var img = tileset.Element("image");
+                    var tiles = tileset.Elements("tile");
+
+                    var tileDefinitions = new Dictionary<int, Dictionary<string, string>>(); //MY EYES
+
+                    foreach (var tile in tiles)
+                    {
+                        int tileID = int.Parse(tile.Attribute("id").Value);
+                        var properties = tile.Element("properties").Elements("property");
+
+                        var propertyDict = new Dictionary<string, string>();
+                        foreach (var property in properties)
                         {
-                            Source = Path.GetFileNameWithoutExtension(img.Attribute("source").Value),
-                            Width = int.Parse(img.Attribute("width").Value),
-                            Height = int.Parse(img.Attribute("height").Value)
-                        };
+                            string propertyName = property.Attribute("name").Value;
+                            string propertyValue = property.Attribute("value").Value;
+
+                            propertyDict[propertyName] = propertyValue;
+                        }
+
+                        tileDefinitions[tileID] = propertyDict;
+                    }
+
+                    return new
+                    {
+                        TileData = tileDefinitions,
+                        Image = Path.GetFileNameWithoutExtension(img.Attribute("source").Value),
+                        Width = int.Parse(img.Attribute("width").Value),
+                        Height = int.Parse(img.Attribute("height").Value)
+                    };
                 }
             }
 
@@ -54,17 +73,15 @@ namespace MemoryLeak
             {
                 get
                 {
-                    Dictionary<string, dynamic> result = new Dictionary<string, dynamic>();
+                    var result = new Dictionary<string, dynamic>();
                     var layers =  Map.Elements("layer").ToList();
 
                     foreach (var layer in layers)
                     {
                         var id = layer.Attribute("name").Value;
 
-                        //TODO: Decompress stuff.
-
-                        var indecipherableMess = layer.Element("data").Value;
-                        var bytes = Convert.FromBase64String(indecipherableMess);
+                        string indecipherableMess = layer.Element("data").Value; //This is a compressed and base64 encoded array of ints, which are actually the tile ids
+                        byte[] bytes = Convert.FromBase64String(indecipherableMess); //Base64 decode
                         
                         var resultStream = new MemoryStream();
 
@@ -74,14 +91,14 @@ namespace MemoryLeak
                             int nRead;
 
                             while ((nRead = zipStream.Read(buffer, 0, buffer.Length)) > 0)
-                                resultStream.Write(buffer, 0, nRead);
+                                resultStream.Write(buffer, 0, nRead); //Read gzip buffer to decompress
                         }
 
-                        var byteTiles = resultStream.ToArray();
+                        var byteTiles = resultStream.ToArray(); 
                         var intTiles = new int[byteTiles.Length / 4];
 
                         for (int i = 0; i < byteTiles.Length; i += 4)
-                            intTiles[i / 4] = BitConverter.ToInt32(byteTiles, i);
+                            intTiles[i / 4] = BitConverter.ToInt32(byteTiles, i); //Convert byte array to int array
 
                         resultStream.Dispose();
 
@@ -117,31 +134,44 @@ namespace MemoryLeak
             var chunk = new Chunk(level.Width, level.Height);
             var camera = new Camera();
 
-            int[] tiles = level.Layers["1"].Tiles;
+            
+            var layers = level.Layers;
+            foreach (var layer in layers)
+            {
+                int[] tiles = layer.Value.Tiles;
 
-            for (int x = 0; x < chunk.Width; x++)
-                for (int y = 0; y < chunk.Height; y++)
-                {
-                    Texture2D tex = Resource<Texture2D>.Get(level.Image.Source);
-
-                    int id = tiles[x + y * chunk.Width];
-                    //TODO: Read from the tiles array and set tx/ty/tw/th from tileset
-
-                    int tx = 0;
-                    int ty = 0;
-                    int tw = 32;
-                    int th = 32;
-
-                    if (id == 3)
+                for (int x = 0; x < chunk.Width; x++)
+                    for (int y = 0; y < chunk.Height; y++)
                     {
+                        Texture2D tex = Resource<Texture2D>.Get(level.Tileset.Image);
+
+                        int id = tiles[x + y * chunk.Width];
+
+                        
+                        /*int tx = id * 32;
+                        int ty = 0;*/
+
+                        //Texture coordinates
+                        int tx = (int)(id * 21.5); //why does this work
+                        int ty = 0;
+                        int tw = 32;
+                        int th = 32;
+
                         var tile = new Chunk.Tile(tex, tx, ty, tw, th);
-                        tile.AddProperty("IsPassable", true);
+
+                        Dictionary<string, string> properties;
+                        if (level.Tileset.TileData.TryGetValue(id, out properties)) //If id isn't found, that means the tile id has no properties defined
+                            foreach (var property in properties)
+                                tile.AddProperty(property.Key, property.Value); //If id IS found, set all properties
+
+                        //tile.AddProperty("IsPassable", true);
                         tile.AddProperty("FrictionMultiplier", 1);
+
                         chunk.Set(x, y, 0, tile);
                     }
-                }
+            }
 
-            var player = new Physical(Resource<Texture2D>.Get("debug-entity"), 1, 1, 0);
+            var player = new Physical(Resource<Texture2D>.Get("debug-entity"), 3, 3, 0);
             var otherDude = new Physical(Resource<Texture2D>.Get("debug-entity"), 6, 6, 0);
 
             float time = 0;
