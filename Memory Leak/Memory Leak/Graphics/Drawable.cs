@@ -43,13 +43,14 @@ namespace MemoryLeak.Graphics
 
         public virtual void Draw(SpriteBatch spriteBatch, int maxDepth, byte darkness = 0)
         {
+            var rect = new Rectangle((int)Rectangle.X, (int)Rectangle.Y, (int)Rectangle.Width, (int)Rectangle.Height);
+
             if (Texture != null)
-                spriteBatch.Draw(Texture, 
-                    new Vector2(Rectangle.Left, Rectangle.Top), Source,
+                spriteBatch.Draw(Texture,
+                    rect, Source,
                     new Color(Color.R - darkness, Color.G - darkness, Color.B - darkness, Color.A),
                     Rotation,
                     Origin,
-                    Scale,
                     SpriteEffects.None,
                     1 - (Depth / maxDepth));
         }

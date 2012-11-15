@@ -133,9 +133,8 @@ namespace MemoryLeak
 
             var chunk = new Chunk(level.Width, level.Height);
             var camera = new Camera();
-
-            
             var layers = level.Layers;
+
             foreach (var layer in layers)
             {
                 int[] tiles = layer.Value.Tiles;
@@ -147,13 +146,12 @@ namespace MemoryLeak
 
                         int id = tiles[x + y * chunk.Width];
 
-                        
-                        /*int tx = id * 32;
-                        int ty = 0;*/
-
                         //Texture coordinates
-                        int tx = (int)(id * 21.5); //why does this work
+
+                        int tx = (int)(id * 32 / 1.5); //why does this work
                         int ty = 0;
+                        //int tx = (id % (tex.Width / 32)) * 32;
+                        //int ty = (id / (tex.Width / 32)) * 32;
                         int tw = 32;
                         int th = 32;
 
@@ -164,7 +162,6 @@ namespace MemoryLeak
                             foreach (var property in properties)
                                 tile.AddProperty(property.Key, property.Value); //If id IS found, set all properties
 
-                        //tile.AddProperty("IsPassable", true);
                         tile.AddProperty("FrictionMultiplier", 1);
 
                         chunk.Set(x, y, 0, tile);
