@@ -109,6 +109,83 @@ namespace MemoryLeak
                 }
             }
 
+            public Dictionary<string, dynamic> ObjectGroups
+            {
+                get
+                {
+                    var result = new Dictionary<string, dynamic>();
+                    var objectgroups = Map.Elements("objectgroup").ToList();
+
+                    List<dynamic> entities = new List<dynamic>();
+
+                    foreach (var objectgroup in objectgroups)
+                    {
+                        var id = objectgroup.Attribute("name").Value;
+                        var objects = objectgroup.Elements("object");
+
+                        foreach (var obj in objects)
+                        {
+                            string name = null;
+                            if (obj.Attribute("name") != null) //Not all objects have a name
+                                name = obj.Attribute("name").Value;
+
+                            int? gid = null; //Nullable types like a boss
+                            if (obj.Attribute("gid") != null) //Not all object have a GID (Global I'd Dump)
+                                gid = int.Parse(obj.Attribute("gid").Value);
+
+                            //TODO: Get gid (but might not be needed at all)
+
+                            int x = int.Parse(obj.Attribute("x").Value);
+                            int y = int.Parse(obj.Attribute("y").Value);
+
+                            int? w = null, h = null; 
+
+                            if (obj.Attribute("width") != null && obj.Attribute("height") != null) //Not all objects have a width and height
+                            {
+                                w = int.Parse(obj.Attribute("width").Value);
+                                h = int.Parse(obj.Attribute("height").Value);
+                            }
+
+                            var prop = obj.Element("properties");
+                            Dictionary<string, string> props = null;
+
+                            if (prop != null) //Not all objects have a <properties> tag
+                            {
+                                props = new Dictionary<string, string>();
+                                var properties = prop.Elements("property");
+
+                                foreach (var property in properties)
+                                {
+                                    string key = property.Attribute("name").Value;
+                                    string value = property.Attribute("value").Value;
+
+                                    props[key] = value; //This is amazingly elegant
+                                }
+                            }
+
+                            Point? size = null;
+                            if (w.HasValue && h.HasValue)
+                                size = new Point(w.Value, h.Value);
+
+                            dynamic entity = new //SAY ONE MORE THING ABOUT DYNAMIC. ONE. MORE. THING.
+                            {
+                                Name = name,
+                                GID = gid,
+                                Position = new Point(x, y),
+                                Size = size,
+                                Properties = props
+                            };
+
+                            entities.Add(entity);
+                        }
+
+                        result[id] = new { Entities = entities };
+                    }
+
+                    return result;
+                }
+            }
+
             public int Width
             {
                 get { return int.Parse(Map.Attribute("width").Value); }
@@ -133,11 +210,14 @@ namespace MemoryLeak
 
             var chunk = new Chunk(level.Width, level.Height);
             var camera = new Camera();
+
             var layers = level.Layers;
+            var objectgroups = level.ObjectGroups;
 
             foreach (var layer in layers)
             {
                 int[] tiles = layer.Value.Tiles;
+                int z = int.Parse(layer.Key);
 
                 for (int x = 0; x < chunk.Width; x++)
                     for (int y = 0; y < chunk.Height; y++)
@@ -164,13 +244,75 @@ namespace MemoryLeak
 
                         tile.AddProperty("FrictionMultiplier", 1);
 
-                        chunk.Set(x, y, 0, tile);
+                        chunk.Set(x, y, z, tile);
                     }
             }
 
-            var player = new Physical(Resource<Texture2D>.Get("debug-entity"), 3, 3, 0);
+            Physical player = null; //This gets set down here
 
-            for (int i = 0; i < 10; i++) //LOOK AT ALL THOSE DUDES HAVING FUN
+            foreach (var objectgroup in objectgroups)
+            {
+                var objects = objectgroup.Value.Entities;
+                int z = int.Parse(objectgroup.Key); //TODO: Does this even work too?
+
+                foreach (var obj in objects)
+                {
+                    string name = obj.Name;
+
+                    bool isPassable = false;
+                    bool isRamp = false;
+
+                    if (obj.Properties != null)
+                    {
+                        isRamp = bool.Parse(obj.Properties["IsRamp"]);
+                        isPassable = bool.Parse(obj.Properties["IsPassable"]);
+                    }
+
+                    int x = (int)(obj.Position.X / 32f) - 0; //This is...
+                    int y = (int)(obj.Position.Y / 32f) - 1; //Pretty wonky.
+
+                    if (isRamp) //If it's a ramp, we don't create an entity at all, but a tile!
+                    {
+                        Texture2D tex = Resource<Texture2D>.Get(level.Tileset.Image);
+
+                        int id = obj.GID;
+
+                        //Texture coordinates
+
+                        int tx = (int)(id * 16); //why does this work
+                        int ty = 0;
+                        int tw = 32;
+                        int th = 32;
+
+                        var tile = new Chunk.Tile(tex, tx, ty, tw, th);
+
+                        foreach (var property in obj.Properties)
+                            tile.AddProperty(property.Key, property.Value);
+
+                        chunk.Set(x, y, z, tile); 
+                    }
+                    else
+                    {
+                        Physical entity;
+
+                        if (name == "player.Start") //TODO: Maybe make these "hardcoded" entities a lookup table of prefabs?
+                        {
+                            entity = new Physical(Resource<Texture2D>.Get("debug-entity"), x, y, z);
+                            player = entity;
+                        }
+                        else
+                            entity = new Physical(Resource<Texture2D>.Get("debug-entity"), //TODO: Read texture from entity
+                                                  x, y, z,
+                                                  isPassable);
+
+                        //TODO: For now, entities don't seem to have a way to set properties...
+
+                        chunk.Add(entity);
+                    }
+                }
+            }
+
+            for (int i = 0; i < 0; i++) //LOOK AT ALL THOSE DUDES HAVING FUN
             {
                 var otherDude = new Physical(Resource<Texture2D>.Get("debug-entity"), RandomHelper.Range(3, 16-3), RandomHelper.Range(3, 16-3), 0);
 
@@ -183,6 +325,9 @@ namespace MemoryLeak
 
                 chunk.Add(otherDude);
             }
+
+            if (player == null)
+                throw new Exception("Well, well, well. Looks like SOMEONE forgot to put a player.Start in the level. Have fun with all your NullReferenceExceptions down here.");
 
             player.Tick += dt =>
                 {
